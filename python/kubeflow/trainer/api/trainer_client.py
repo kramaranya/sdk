@@ -28,6 +28,30 @@ logger = logging.getLogger(__name__)
 
 
 class TrainerClient(AbstractTrainerClient):
+    """TrainerClient constructor. Configure logging in your application
+    as follows to see detailed information from the TrainerClient APIs:
+
+    .. code-block:: python
+
+        import logging
+        logging.basicConfig()
+        log = logging.getLogger("kubeflow.trainer.api.trainer_client")
+        log.setLevel(logging.DEBUG)
+
+    Args:
+        config_file: Path to the kube-config file. Defaults to ~/.kube/config.
+        context: Set the active context. Defaults to current_context from the kube-config.
+        client_configuration: Client configuration for cluster authentication.
+            You have to provide valid configuration with Bearer token or
+            with username and password. You can find an example here:
+            https://github.com/kubernetes-client/python/blob/67f9c7a97081b4526470cad53576bc3b71fa6fcc/examples/remote_cluster.py#L31
+        namespace: Target Kubernetes namespace. If SDK runs outside of Kubernetes cluster it
+            takes the namespace from the kube-config context. If SDK runs inside
+            the Kubernetes cluster it takes namespace from the
+            `/var/run/secrets/kubernetes.io/serviceaccount/namespace` file. By default it
+            uses the `default` namespace.
+    """
+
     def __init__(
         self,
         config_file: Optional[str] = None,
@@ -35,28 +59,6 @@ class TrainerClient(AbstractTrainerClient):
         client_configuration: Optional[client.Configuration] = None,
         namespace: Optional[str] = None,
     ):
-        """TrainerClient constructor. Configure logging in your application
-            as follows to see detailed information from the TrainerClient APIs:
-            .. code-block:: python
-                import logging
-                logging.basicConfig()
-                log = logging.getLogger("kubeflow.trainer.api.trainer_client")
-                log.setLevel(logging.DEBUG)
-
-        Args:
-            config_file: Path to the kube-config file. Defaults to ~/.kube/config.
-            context: Set the active context. Defaults to current_context from the kube-config.
-            client_configuration: Client configuration for cluster authentication.
-                You have to provide valid configuration with Bearer token or
-                with username and password. You can find an example here:
-                https://github.com/kubernetes-client/python/blob/67f9c7a97081b4526470cad53576bc3b71fa6fcc/examples/remote_cluster.py#L31
-            namespace: Target Kubernetes namespace. If SDK runs outside of Kubernetes cluster it
-                takes the namespace from the kube-config context. If SDK runs inside
-                the Kubernetes cluster it takes namespace from the
-                `/var/run/secrets/kubernetes.io/serviceaccount/namespace` file. By default it
-                uses the `default` namespace.
-        """
-
         if namespace is None:
             namespace = utils.get_default_target_namespace(context)
 
