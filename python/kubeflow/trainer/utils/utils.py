@@ -15,9 +15,12 @@
 import inspect
 import os
 import queue
+import random
 import re
+import string
 import textwrap
 import threading
+import uuid
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
@@ -80,6 +83,30 @@ def get_container_devices(
         raise Exception(f"Failed to get device count for resources: {resources.limits}")
 
     return device, str(device_count)
+
+
+def get_runtime_from_crd(
+    runtime_crd: models.TrainerV1alpha1ClusterTrainingRuntime,
+) -> types.Runtime:
+
+    if not (
+        runtime_crd.metadata
+        and runtime_crd.metadata.name
+        and runtime_crd.spec
+        and runtime_crd.spec.ml_policy
+        and runtime_crd.spec.template.spec
+        and runtime_crd.spec.template.spec.replicated_jobs
+    ):
+        raise Exception(f"ClusterTrainingRuntime CRD is invalid: {runtime_crd}")
+
+    return types.Runtime(
+        name=runtime_crd.metadata.name,
+        trainer=get_runtime_trainer(
+            runtime_crd.spec.template.spec.replicated_jobs,
+            runtime_crd.spec.ml_policy,
+            runtime_crd.metadata,
+        ),
+    )
 
 
 def get_runtime_trainer_container(
@@ -587,3 +614,7 @@ def get_args_in_dataset_preprocess_config(
         args.append(f"dataset.column_map={dataset_preprocess_config.column_map}")
 
     return args
+
+
+def generate_train_job_name() -> str:
+    return random.choice(string.ascii_lowercase) + uuid.uuid4().hex[:11]
