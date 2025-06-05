@@ -21,7 +21,7 @@ import threading
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
-import kubeflow.trainer.models as models
+import kubeflow_trainer_api.models as models
 from kubeflow.trainer.constants import constants
 from kubeflow.trainer.types import types
 from kubernetes import config

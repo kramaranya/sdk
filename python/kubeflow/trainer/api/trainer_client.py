@@ -20,7 +20,7 @@ import string
 import uuid
 from typing import Dict, List, Optional
 
-import kubeflow.trainer.models as models
+import kubeflow_trainer_api.models as models
 from kubeflow.trainer.constants import constants
 from kubeflow.trainer.types import types
 from kubeflow.trainer.utils import utils
