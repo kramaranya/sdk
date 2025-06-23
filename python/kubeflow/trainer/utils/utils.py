@@ -279,6 +279,10 @@ def get_entrypoint_using_train_func(
     train_func_parameters: Optional[Dict[str, Any]],
     pip_index_url: str,
     packages_to_install: Optional[List[str]] = None,
+    enable_mlflow: Optional[bool] = None,
+    mlflow_experiment_name: Optional[str] = None,
+    mlflow_tracking_uri: Optional[str] = None,
+    mlflow_tags: Optional[Dict[str, str]] = None,
 ) -> Tuple[List[str], List[str]]:
     """
     Get the Trainer command and args from the given training function and parameters.
@@ -325,8 +329,28 @@ def get_entrypoint_using_train_func(
         container_command = constants.DEFAULT_CUSTOM_COMMAND
         python_entrypoint = " ".join(runtime.trainer.entrypoint)
 
+    mlflow_env_vars = ""
+    if enable_mlflow:
+        mlflow_env_vars = "export KUBEFLOW_ENABLE_MLFLOW=true\n"
+        if mlflow_experiment_name:
+            mlflow_env_vars += f"export KUBEFLOW_MLFLOW_EXPERIMENT='{mlflow_experiment_name}'\n"
+        if mlflow_tracking_uri:
+            if mlflow_tracking_uri.startswith("file:./"):
+                relative_path = mlflow_tracking_uri[7:]
+                container_tracking_uri = f"file:///workspace/{relative_path}"
+                mlflow_env_vars += f"export KUBEFLOW_MLFLOW_TRACKING_URI='{container_tracking_uri}'\n"
+                mlflow_env_vars += f"export KUBEFLOW_MLFLOW_TRACKING_URI_ORIGINAL='{mlflow_tracking_uri}'\n"
+            else:
+                mlflow_env_vars += f"export KUBEFLOW_MLFLOW_TRACKING_URI='{mlflow_tracking_uri}'\n"
+        else:
+            mlflow_env_vars += "export KUBEFLOW_MLFLOW_TRACKING_URI='file:///workspace/python/mlruns'\n"
+        if mlflow_tags:
+            import json
+            mlflow_env_vars += f"export KUBEFLOW_MLFLOW_TAGS='{json.dumps(mlflow_tags)}'\n"
+
     exec_script = textwrap.dedent(
         """
+                {mlflow_env_vars}
                 read -r -d '' SCRIPT << EOM\n
                 {func_code}
                 EOM
@@ -336,6 +360,7 @@ def get_entrypoint_using_train_func(
 
     # Add function code to the execute script.
     exec_script = exec_script.format(
+        mlflow_env_vars=mlflow_env_vars,
         func_code=func_code,
         func_file=func_file,
         python_entrypoint=python_entrypoint,
@@ -439,6 +464,10 @@ def get_trainer_crd_from_custom_trainer(
         trainer.func_args,
         trainer.pip_index_url,
         trainer.packages_to_install,
+        trainer.enable_mlflow,
+        trainer.mlflow_experiment_name,
+        trainer.mlflow_tracking_uri,
+        trainer.mlflow_tags,
     )
 
     return trainer_crd

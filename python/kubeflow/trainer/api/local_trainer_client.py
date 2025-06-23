@@ -131,6 +131,10 @@ class LocalTrainerClient(AbstractTrainerClient):
                 trainer.func_args,
                 trainer.pip_index_url,
                 trainer.packages_to_install,
+                trainer.enable_mlflow,
+                trainer.mlflow_experiment_name,
+                trainer.mlflow_tracking_uri,
+                trainer.mlflow_tags,
             )
         else:
             entrypoint = runtime_container.command
@@ -141,6 +145,17 @@ class LocalTrainerClient(AbstractTrainerClient):
         else:
             num_nodes = 1
 
+        additional_env = {}
+        if trainer and trainer.enable_mlflow:
+            additional_env["KUBEFLOW_ENABLE_MLFLOW"] = "true"
+            if trainer.mlflow_experiment_name:
+                additional_env["KUBEFLOW_MLFLOW_EXPERIMENT"] = trainer.mlflow_experiment_name
+            if trainer.mlflow_tracking_uri:
+                additional_env["KUBEFLOW_MLFLOW_TRACKING_URI"] = trainer.mlflow_tracking_uri
+            if trainer.mlflow_tags:
+                import json
+                additional_env["KUBEFLOW_MLFLOW_TAGS"] = json.dumps(trainer.mlflow_tags)
+
         train_job_name = self.job_runner.create_job(
             image=image,
             entrypoint=entrypoint,
@@ -148,6 +163,7 @@ class LocalTrainerClient(AbstractTrainerClient):
             num_nodes=num_nodes,
             framework=runtime.trainer.framework,
             runtime_name=runtime.name,
+            additional_env=additional_env if additional_env else None,
         )
         return train_job_name
 

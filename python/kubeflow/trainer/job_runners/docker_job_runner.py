@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from datetime import datetime
 from typing import Dict, List, Optional
 
@@ -44,6 +45,7 @@ class DockerJobRunner(JobRunner):
         num_nodes: int,
         framework: types.Framework,
         runtime_name: str,
+        additional_env: Optional[Dict[str, str]] = None,
     ) -> str:
         """Creates a training job.
 
@@ -54,6 +56,7 @@ class DockerJobRunner(JobRunner):
             num_nodes: The number of nodes to run the job on.
             framework: The framework being used.
             runtime_name: The name of the runtime being used.
+            additional_env: Additional environment variables to pass to the container.
 
         Returns:
             The name of the created job.
@@ -78,6 +81,21 @@ class DockerJobRunner(JobRunner):
         )
 
         for i in range(num_nodes):
+            volumes = {
+                os.getcwd(): {"bind": "/workspace", "mode": "rw"}
+            }
+
+            mlruns_path = os.path.join(os.getcwd(), "python", "mlruns")
+            os.makedirs(mlruns_path, exist_ok=True)
+            
+            container_env = self.__get_container_environment(
+                framework=framework,
+                head_node_address=f"{train_job_name}-0",
+                num_nodes=num_nodes,
+                node_rank=i,
+                additional_env=additional_env,
+            )
+            
             self.docker_client.containers.run(
                 name=f"{train_job_name}-{i}",
                 network=docker_network.id,
@@ -89,12 +107,9 @@ class DockerJobRunner(JobRunner):
                     constants.LOCAL_NODE_RANK_LABEL: str(i),
                     constants.CONTAINER_RUNTIME_LABEL: runtime_name,
                 },
-                environment=self.__get_container_environment(
-                    framework=framework,
-                    head_node_address=f"{train_job_name}-0",
-                    num_nodes=num_nodes,
-                    node_rank=i,
-                ),
+                environment=container_env,
+                volumes=volumes,
+                working_dir="/workspace",
                 detach=True,
             )
 
@@ -249,17 +264,23 @@ class DockerJobRunner(JobRunner):
         head_node_address: str,
         num_nodes: int,
         node_rank: int,
+        additional_env: Optional[Dict[str, str]] = None,
     ) -> Dict[str, str]:
         if framework != types.Framework.TORCH:
             raise RuntimeError(f"Framework '{framework}' is not currently supported.")
 
-        return {
+        env = {
             "PET_NNODES": str(num_nodes),
             "PET_NPROC_PER_NODE": "1",
             "PET_NODE_RANK": str(node_rank),
             "PET_MASTER_ADDR": head_node_address,
             "PET_MASTER_PORT": str(constants.TORCH_HEAD_NODE_PORT),
         }
+
+        if additional_env:
+            env.update(additional_env)
+            
+        return env
 
     @staticmethod
     def __get_job_status(_: List[types.Container]) -> str:

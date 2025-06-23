@@ -35,6 +35,10 @@ class CustomTrainer:
         pip_index_url (`Optional[str]`): The PyPI URL from which to install Python packages.
         num_nodes (`Optional[int]`): The number of nodes to use for training.
         resources_per_node (`Optional[Dict]`): The computing resources to allocate per node.
+        enable_mlflow (`Optional[bool]`): Whether to enable MLFlow traking for this training job.
+        mlflow_experiment_name (`Optional[str]`): MLflow experiment name.
+        mlflow_tracking_uri (`Optional[str]`): MLflow tracking server URI.
+        mlflow_tags (`Optional[Dict[str, str]]`): Additional tags for MLflow run.
     """
 
     func: Callable
@@ -43,6 +47,10 @@ class CustomTrainer:
     pip_index_url: str = constants.DEFAULT_PIP_INDEX_URL
     num_nodes: Optional[int] = None
     resources_per_node: Optional[Dict] = None
+    enable_mlflow: Optional[bool] = None
+    mlflow_experiment_name: Optional[str] = None
+    mlflow_tracking_uri: Optional[str] = None
+    mlflow_tags: Optional[Dict[str, str]] = None
 
 
 # TODO(Electronic-Waste): Add more loss functions.

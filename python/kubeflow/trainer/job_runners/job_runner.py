@@ -29,6 +29,7 @@ class JobRunner(ABC):
         num_nodes: int,
         framework: types.Framework,
         runtime_name: str,
+        additional_env: Optional[Dict[str, str]] = None,
     ) -> str:
         pass
 
