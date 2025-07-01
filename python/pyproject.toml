@@ -32,7 +32,8 @@ classifiers = [
 dependencies = [
   "kubernetes>=27.2.0",
   "pydantic>=2.10.0",
-  "kubeflow_trainer_api@git+https://github.com/kubeflow/trainer.git@master#subdirectory=api/python_api"
+  "kubeflow_trainer_api@git+https://github.com/kubeflow/trainer.git@master#subdirectory=api/python_api",
+  "modelregistry-plugin@git+https://github.com/dhirajsb/model-registry-kfp.git@feat/mlflow-plugin#egg=modelregistry_plugin&subdirectory=clients/modelregistry_plugin",
 ]
 
 [project.urls]
