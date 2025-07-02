@@ -27,4 +27,9 @@ from .tracking import (
     delete_experiment
 )
 
+from .model_registry import (
+    get_tracking_store_uri,
+    list_model_registries,
+)
+
 from modelregistry_plugin import ModelRegistryTrackingStore
