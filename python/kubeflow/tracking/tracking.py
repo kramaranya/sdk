@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import mlflow
@@ -9,6 +10,40 @@ if TYPE_CHECKING:
     import pandas
 
 SEARCH_MAX_RESULTS_PANDAS = 100000
+
+
+def set_tracking_uri(uri: Union[str, Path]) -> None:
+    """
+    Set the tracking server URI. This does not affect the
+    currently active run (if one exists), but takes effect for successive runs.
+
+    Args:
+        uri:
+
+            - An empty string, or a local file path, prefixed with ``file:/``. Data is stored
+              locally at the provided file (or ``./mlruns`` if empty).
+            - An HTTP URI like ``https://my-tracking-server:5000``.
+            - A Databricks workspace, provided as the string "databricks" or, to use a Databricks
+              CLI `profile <https://github.com/databricks/databricks-cli#installation>`_,
+              "databricks://<profileName>".
+            - A :py:class:`pathlib.Path` instance
+
+    .. code-block:: python
+        :test:
+        :caption: Example
+
+        import mlflow
+
+        mlflow.set_tracking_uri("file:///tmp/my_tracking")
+        tracking_uri = mlflow.get_tracking_uri()
+        print(f"Current tracking uri: {tracking_uri}")
+
+    .. code-block:: text
+        :caption: Output
+
+        Current tracking uri: file:///tmp/my_tracking
+    """
+    return mlflow.set_tracking_uri(uri)
 
 
 def create_experiment(

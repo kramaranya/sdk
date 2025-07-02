@@ -1,6 +1,7 @@
 __version__ = "0.1.0"
 
 from .tracking import (
+    set_tracking_uri,
     active_run,
     autolog,
     create_experiment,
@@ -25,3 +26,5 @@ from .tracking import (
     start_run,
     delete_experiment
 )
+
+from modelregistry_plugin import ModelRegistryTrackingStore
