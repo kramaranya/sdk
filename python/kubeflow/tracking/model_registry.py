@@ -14,6 +14,7 @@
 
 from dataclasses import dataclass
 from typing import List
+import os
 
 from kubernetes import client, config
 from kubernetes.client.models.v1_service import V1Service
@@ -27,7 +28,11 @@ MODEL_REGISTRY_KIND_PLURAL = "modelregistries"
 
 # TODO: Add configurable k8s client, and add this method to fluent API
 def get_tracking_store_uri(name: str, namespace: str) -> str:
-    config.load_kube_config()
+    if is_running_in_k8s():
+        config.load_incluster_config()
+    else:
+        config.load_kube_config()
+
     k8s_client = client.ApiClient()
     core_api = client.CoreV1Api(k8s_client)
 
@@ -49,7 +54,11 @@ class ModelRegistry:
 # TODO: implement list_all_model_regitries in all namespaces
 # TODO: would the name "list_tracking_stores" be more useful?
 def list_model_registries(namespace: str) -> List[ModelRegistry]:
-    config.load_kube_config()
+    if is_running_in_k8s():
+        config.load_incluster_config()
+    else:
+        config.load_kube_config()
+
     k8s_client = client.ApiClient()
     custom_api = client.CustomObjectsApi(k8s_client)
 
@@ -69,3 +78,6 @@ def list_model_registries(namespace: str) -> List[ModelRegistry]:
         model_registries_list.append(ModelRegistry(model_registry["metadata"]["name"], is_available))
 
     return model_registries_list
+
+def is_running_in_k8s() -> bool:
+    return os.path.isdir("/var/run/secrets/kubernetes.io/")
