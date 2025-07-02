@@ -41,19 +41,9 @@ def get_tracking_store_uri(name: str, namespace: str) -> str:
     return f"modelregistry+https://{svc.metadata.annotations[TRACKING_URI_ANNOTATION_KEY]}"
 
 
-# TODO: discuss information a data scientist may want to see
-@dataclass
-class ModelRegistry:
-    name: str
-    available: bool
-
-    def __str__(self) -> str:
-        return f"Name: {self.name}, Available: {self.available})"
-
-
 # TODO: implement list_all_model_regitries in all namespaces
 # TODO: would the name "list_tracking_stores" be more useful?
-def list_model_registries(namespace: str) -> List[ModelRegistry]:
+def list_model_registries(namespace: str) -> List[str]:
     if is_running_in_k8s():
         config.load_incluster_config()
     else:
@@ -69,13 +59,9 @@ def list_model_registries(namespace: str) -> List[ModelRegistry]:
         plural=MODEL_REGISTRY_KIND_PLURAL,
     )
 
-    model_registries_list: List[ModelRegistry] = []
+    model_registries_list: List[str] = []
     for model_registry in model_registries["items"]:
-        is_available = False
-        for condition in model_registry["status"]["conditions"]:
-            if condition["type"] == "Available":
-                is_available = bool(condition["status"])
-        model_registries_list.append(ModelRegistry(model_registry["metadata"]["name"], is_available))
+        model_registries_list.append(model_registry["metadata"]["name"])
 
     return model_registries_list
 
