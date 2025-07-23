@@ -8,3 +8,4 @@
 - Migrate Katib SDK
 - Include Kubeflow SDK into the KFP SDK
   - https://github.com/kubeflow/pipelines/issues/12027
+- Migrate Model Registry SDK
