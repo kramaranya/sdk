@@ -13,3 +13,6 @@
 - Include Kubeflow SDK into the KFP SDK
   - https://github.com/kubeflow/pipelines/issues/12027
 - Migrate Model Registry SDK
+- Improve test coverage
+  - https://github.com/kubeflow/sdk/issues/16
+  - https://github.com/kubeflow/sdk/issues/18
