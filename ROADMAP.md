@@ -16,3 +16,9 @@
 - Improve test coverage
   - https://github.com/kubeflow/sdk/issues/16
   - https://github.com/kubeflow/sdk/issues/18
+- Manage Kubeflow TrainJobs in a multi-cluster environment
+  - https://github.com/kubeflow/sdk/issues/23
+- Snapshot users' workspace into distributed TrainJob workload
+  - https://github.com/kubeflow/sdk/issues/48
+- Support distributed data cache configuration via initializer SDK
+  - https://github.com/kubeflow/trainer/issues/2655
