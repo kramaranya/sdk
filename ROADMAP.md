@@ -2,7 +2,7 @@
 
 ## 2025
 
-- Release Kubeflow SDK 0.1.0 to PyPi
+- Release Kubeflow SDK 0.1.0 to PyPI
   - https://github.com/kubeflow/sdk/issues/45
 - Local Execution for Training Jobs
   - https://github.com/kubeflow/sdk/issues/22
