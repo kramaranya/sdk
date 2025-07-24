@@ -4,6 +4,8 @@
 
 - Release Kubeflow SDK 0.1.0 to PyPI
   - https://github.com/kubeflow/sdk/issues/45
+- Migrate Trainer SDK
+  - https://github.com/kubeflow/sdk/issues/1
 - Local Execution for Training Jobs
   - https://github.com/kubeflow/sdk/issues/22
 - Migrate Katib SDK
