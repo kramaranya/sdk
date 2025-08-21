@@ -1,0 +1,117 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-rc.*'
+      - 'v*.*.*-alpha.*'
+      - 'v*.*.*-beta.*'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  test:
+    name: Run Tests
+    uses: ./.github/workflows/test-python.yaml
+
+  build:
+    name: Build Package
+    needs: [test]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      is-prerelease: ${{ steps.version.outputs.is-prerelease }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup build environment
+        run: |
+          make verify
+
+      - name: Extract version info
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+          if [[ "$VERSION" =~ -rc\.|alpha|beta ]]; then
+            echo "is-prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is-prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Auto-update version from git tag
+        run: |
+          TAG_VERSION="${{ steps.version.outputs.version }}"
+          echo "Updating version to $TAG_VERSION"
+
+          sed -i 's/__version__ = "[^"]*"/__version__ = "'$TAG_VERSION'"/' kubeflow/__init__.py
+
+          echo "Version automatically updated to $TAG_VERSION"
+
+      - name: Auto-update version files only
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          if git diff --quiet kubeflow/__init__.py; then
+            echo "No version changes to commit"
+          else
+            echo "Committing version updates"
+            git add kubeflow/__init__.py
+            git commit -m "chore: update version to ${{ steps.version.outputs.tag }}" || true
+
+            if [[ "${GITHUB_REF}" =~ refs/heads/release-.* ]]; then
+              echo "Pushing version updates back to release branch"
+              git push origin HEAD:${GITHUB_REF#refs/heads/}
+            fi
+          fi
+
+      - name: Build package
+        run: |
+          uv build
+
+      - name: Validate package
+        run: |
+          uvx twine check dist/*
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ steps.version.outputs.version }}
+          path: dist/
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: https://pypi.org/project/kubeflow-sdk/
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ needs.build.outputs.version }}
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
