@@ -115,3 +115,42 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
+
+  github-release:
+    name: Create GitHub Release
+    needs: [build, publish-pypi]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+
+          if [[ -f CHANGELOG.md ]]; then
+            CHANGELOG=$(awk "/^# \[?v?$VERSION\]?/,/^# \[?v?[0-9]/" CHANGELOG.md | sed '$d' | tail -n +2)
+            if [[ -n "$CHANGELOG" ]]; then
+              echo "changelog<<EOF" >> $GITHUB_OUTPUT
+              echo "$CHANGELOG" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "**Note:** CHANGELOG.md was not updated for this release" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "**Note:** CHANGELOG.md not found" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.build.outputs.tag }}
+          name: Kubeflow SDK ${{ needs.build.outputs.tag }}
+          body: |
+            ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: ${{ needs.build.outputs.is-prerelease == 'true' }}
+          generate_release_notes: true
