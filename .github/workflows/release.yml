@@ -102,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: release
-      url: https://pypi.org/project/kubeflow-sdk/
+      url: https://pypi.org/project/kubeflow/
 
     steps:
       - name: Download build artifacts
