@@ -298,7 +298,7 @@ dev = [
 requires-dist = [
     { name = "coverage", marker = "extra == 'dev'", specifier = ">=7.0" },
     { name = "kubeflow-trainer-api", specifier = ">=2.0.0" },
-    { name = "kubeflow-trainer-api", marker = "extra == 'dev'", git = "https://github.com/kubeflow/trainer.git?subdirectory=api%2Fpython_api&rev=master" },
+    { name = "kubeflow-trainer-api", marker = "extra == 'dev'", specifier = ">=2.0.0" },
     { name = "kubernetes", specifier = ">=27.2.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.2.0" },
     { name = "pydantic", specifier = ">=2.10.0" },
@@ -311,9 +311,13 @@ provides-extras = ["dev"]
 [[package]]
 name = "kubeflow-trainer-api"
 version = "2.0.0"
-source = { git = "https://github.com/kubeflow/trainer.git?subdirectory=api%2Fpython_api&rev=master#b71a69064fa033c2ca51f6a24dbe199b552cada9" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/52/6a/1ddcf83c377d851ae4f14f1d387c5fe6da528f10da6fd482f106f007481f/kubeflow_trainer_api-2.0.0.tar.gz", hash = "sha256:842db74e123053fd8e229e2e9283c7d18a5294c0ab32b567a5efea91047ba285", size = 207384 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/36/1d/23bc0ab9bc8c09df2c3ebda0c131bba1f598ed45c537b337b41eba4aad6f/kubeflow_trainer_api-2.0.0-py3-none-any.whl", hash = "sha256:90d0644037c7b600ece26caf74c7e4498aa651e264d676821e540fdfe3bee6f7", size = 712595 },
 ]
 
 [[package]]
