@@ -276,7 +276,7 @@ wheels = [
 ]
 
 [[package]]
-name = "kubeflow"
+name = "kubeflow-test"
 source = { editable = "." }
 dependencies = [
     { name = "kubeflow-trainer-api" },
