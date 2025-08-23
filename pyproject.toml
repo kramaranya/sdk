@@ -1,5 +1,5 @@
 [project]
-name = "kubeflow"
+name = "kubeflow-test"
 dynamic = ["version"]
 requires-python = ">=3.9"
 authors = [
