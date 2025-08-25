@@ -24,13 +24,7 @@ source .venv/bin/activate
 
 Install dependencies in editable mode:
 ```sh
-pip install -e .
-```
-
-#### Development Build (Optional)
-To install development tools and the latest API modules directly from the master branch:
-```sh
-uv pip install -e . --group dev
+uv sync
 ```
 
 ## Development Workflow
