@@ -39,7 +39,7 @@ pip install git+https://github.com/kubeflow/sdk.git@main
 ```
 <!-- TODO(kramaranya): update before release pip install -U kubeflow -->
 
-### Run your first distributed training job
+### Run your first PyTorch distributed job
 
 ```python
 from kubeflow.trainer import TrainerClient, CustomTrainer
