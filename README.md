@@ -21,6 +21,15 @@ ML applications rather than managing complex infrastrutcure.
 - **Seamless Integration**: Designed to work together with all Kubeflow projects for end-to-end ML pipelines
 - **Local Development**: First-class support for local development requiring only `pip` installation
 
+<div style="text-align: center;">
+  <img
+    src="https://github.com/kubeflow/sdk/blob/main/docs/images/persona_diagram.svg"
+    width="600"
+    title="Kubeflow SDK Personas"
+    alt="Kubeflow SDK Personas"
+  />
+</div>
+
 ## Get Started
 
 ### Install Kubeflow SDK
