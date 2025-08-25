@@ -23,7 +23,7 @@ ML applications rather than managing complex infrastrutcure.
 
 <div style="text-align: center;">
   <img
-    src="https://github.com/kubeflow/sdk/blob/main/docs/images/persona_diagram.svg"
+    src="https://raw.githubusercontent.com/kubeflow/sdk/main/docs/images/persona_diagram.svg"
     width="600"
     title="Kubeflow SDK Personas"
     alt="Kubeflow SDK Personas"
