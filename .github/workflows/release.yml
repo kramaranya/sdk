@@ -108,6 +108,9 @@ jobs:
     name: Create GitHub Release
     needs: [build, publish-pypi]
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: https://github.com/kramaranya/sdk/releases
 
     steps:
       - uses: actions/checkout@v4
