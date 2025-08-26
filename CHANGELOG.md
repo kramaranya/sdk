@@ -2,7 +2,7 @@
 
 All notable changes to the Kubeflow SDK will be documented in this file.
 
-# [v0.2.0](https://github.com/kubeflow/sdk/releases/tag/v0.2.0) (2025-08-23)
+# [v0.3.0](https://github.com/kubeflow/sdk/releases/tag/v0.3.0) (2025-08-23)
 
 ## New Features
 
