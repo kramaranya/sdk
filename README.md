@@ -2,7 +2,6 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/kubeflow?color=%2334D058&label=pypi%20package)](https://pypi.org/project/kubeflow/)
 [![PyPI Downloads](https://static.pepy.tech/badge/kubeflow)](https://pepy.tech/projects/kubeflow)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue)](https://github.com/kubeflow/sdk/blob/main/LICENSE)
 [![Join Slack](https://img.shields.io/badge/Join_Slack-blue?logo=slack)](https://www.kubeflow.org/docs/about/community/#kubeflow-slack-channels)
 [![Coverage Status](https://coveralls.io/repos/github/kubeflow/sdk/badge.svg?branch=main)](https://coveralls.io/github/kubeflow/sdk?branch=main)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kubeflow/sdk)
