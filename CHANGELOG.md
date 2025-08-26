@@ -2,9 +2,9 @@
 
 All notable changes to the Kubeflow SDK will be documented in this file.
 
-## [v0.2.0](https://github.com/kubeflow/sdk/releases/tag/v0.2.0) (2025-08-23)
+# [v0.2.0](https://github.com/kubeflow/sdk/releases/tag/v0.2.0) (2025-08-23)
 
-### New Features
+## New Features
 
 - feat(ci): Add GitHub action to verify PR titles ([#42](https://github.com/kubeflow/sdk/pull/42)) by [@andreyvelich](https://github.com/andreyvelich)
 - feat(trainer): Add `wait_for_job_status()` API ([#52](https://github.com/kubeflow/sdk/pull/52)) by [@andreyvelich](https://github.com/andreyvelich)
@@ -12,12 +12,12 @@ All notable changes to the Kubeflow SDK will be documented in this file.
 - feat(trainer): Support Framework Labels in Runtimes ([#56](https://github.com/kubeflow/sdk/pull/56)) by [@andreyvelich](https://github.com/andreyvelich)
 - feat(trainer): Add `get_runtime_packages()` API ([#57](https://github.com/kubeflow/sdk/pull/57)) by [@andreyvelich](https://github.com/andreyvelich)
 
-### Bug Fixes
+## Bug Fixes
 
 - fix: Expose BuiltinTrainer API to users ([#28](https://github.com/kubeflow/sdk/pull/28)) by [@Electronic-Waste](https://github.com/Electronic-Waste)
 - fix(trainer): fix __all__ import. ([#43](https://github.com/kubeflow/sdk/pull/43)) by [@Electronic-Waste](https://github.com/Electronic-Waste)
 
-### Maintenance
+## Maintenance
 
 - chore(trainer): Remove accelerator label from the runtimes ([#51](https://github.com/kubeflow/sdk/pull/51)) by [@andreyvelich](https://github.com/andreyvelich)
 - chore(docs): Add Coveralls Badge to the README ([#53](https://github.com/kubeflow/sdk/pull/53)) by [@andreyvelich](https://github.com/andreyvelich)
@@ -25,7 +25,7 @@ All notable changes to the Kubeflow SDK will be documented in this file.
 - chore(ci): Align Kubernetes versions from Trainer for e2e tests ([#58](https://github.com/kubeflow/sdk/pull/58)) by [@astefanutti](https://github.com/astefanutti)
 - chore: move pyproject.toml to root ([#61](https://github.com/kubeflow/sdk/pull/61)) by [@kramaranya](https://github.com/kramaranya)
 
-### Other Changes
+## Other Changes
 
 - Add GitHub issue and PR templates ([#5](https://github.com/kubeflow/sdk/pull/5)) by [@eoinfennessy](https://github.com/eoinfennessy)
 - Add Stale GitHub action ([#7](https://github.com/kubeflow/sdk/pull/7)) by [@kramaranya](https://github.com/kramaranya)
