@@ -130,7 +130,7 @@ def main():
 
     new_content = ''.join(changelog_content)
     new_lines = (
-        lines[:insert_index] + [''] + new_content.rstrip().split('\n') + [''] + lines[insert_index:]
+        lines[:insert_index] + new_content.rstrip().split('\n') + [''] + lines[insert_index:]
     )
 
     with open(CHANGELOG_FILE, "w") as f:
