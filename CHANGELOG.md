@@ -1,6 +1,6 @@
 # Changelog
 
-# [v0.5.0](https://github.com/kubeflow/sdk/releases/tag/v0.5.0) (2025-09-01)
+# [v0.5.0](https://github.com/kubeflow/sdk/releases/tag/v0.6.0) (2025-09-01)
 
 ## New Features
 
