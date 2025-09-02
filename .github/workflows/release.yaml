@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: release
-      url: https://pypi.org/project/kubeflow/
+      url: https://pypi.org/project/kubeflow-test/
 
     steps:
       - name: Download build artifacts
@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: release
-      url: https://github.com/kubeflow/sdk/releases
+      url: https://github.com/kramaranya/sdk/releases
 
     steps:
       - uses: actions/checkout@v4
