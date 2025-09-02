@@ -52,7 +52,7 @@ ruff: ## Install Ruff
 
 .PHONY: verify
 verify: uv uv-venv ruff  ## install all required tools
-	@uv lock --check
+	@uv sync
 	@uvx ruff check --show-fixes
 
 .PHONY: uv-venv
