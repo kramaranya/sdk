@@ -1,0 +1,28 @@
+name: Welcome new contributors
+
+on:
+  pull_request_target:
+    types:
+      - opened
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/first-interaction@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-message: |
+            🎉 **Welcome to the Kubeflow SDK!** 🎉
+
+            Thanks for opening your first PR! We're happy to have you as part of our community 🚀
+
+            **Here's what happens next:**
+
+            - If you haven't already, please check out our [Contributing Guide](https://github.com/kubeflow/sdk/blob/main/CONTRIBUTING.md)
+            - Our team will review your PR soon! cc @kubeflow/kubeflow-sdk-team
+            - Feel free to ask questions in the comments if you need any help or clarification
+
+            Thanks again for contributing to Kubeflow! 🙏
