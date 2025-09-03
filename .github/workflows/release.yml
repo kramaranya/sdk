@@ -1,23 +1,28 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
-      - 'v*.*.*-rc.*'
+  workflow_run:
+    workflows: ["Prepare Release"]
+    types:
+      - completed
 
 permissions:
   contents: write
   id-token: write
 
 jobs:
-  test:
-    name: Run Tests
-    uses: ./.github/workflows/test-python.yaml
-
+  guard:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    outputs:
+      proceed: ${{ steps.set.outputs.proceed }}
+    steps:
+      - id: set
+        run: echo "proceed=true" >> $GITHUB_OUTPUT
   build:
     name: Build Package
-    needs: [test]
+    needs: [guard]
+    if: needs.guard.outputs.proceed == 'true'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -30,6 +35,29 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract version info
+        id: version
+        run: |
+          VERSION=v$(python -c "import kubeflow; print(kubeflow.__version__)" )
+          TAG=$VERSION
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+          if [[ "$VERSION" =~ -rc($|\.) ]]; then
+            echo "is-prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is-prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout release branch
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          MAJOR_MINOR=$(echo "$VERSION" | sed 's/^v//' | cut -d. -f1,2)
+          BRANCH="release-$MAJOR_MINOR"
+          echo "Switching to $BRANCH"
+          git fetch origin "$BRANCH":"$BRANCH" || true
+          git checkout "$BRANCH"
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -39,24 +67,10 @@ jobs:
         run: |
           make verify
 
-      - name: Extract version info
-        id: version
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          TAG=${GITHUB_REF#refs/tags/}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-
-          if [[ "$VERSION" =~ -rc\.|alpha|beta ]]; then
-            echo "is-prerelease=true" >> $GITHUB_OUTPUT
-          else
-            echo "is-prerelease=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Verify version
         run: |
           TAG_VERSION="${{ steps.version.outputs.version }}"
-          CODE_VERSION=$(python -c "import kubeflow; print(kubeflow.__version__)")
+          CODE_VERSION="v$(python -c "import kubeflow; print(kubeflow.__version__)")"
 
           echo "Tag version: $TAG_VERSION"
           echo "Code version: $CODE_VERSION"
@@ -82,9 +96,29 @@ jobs:
           name: dist-${{ steps.version.outputs.version }}
           path: dist/
 
+  create-tag:
+    name: Create and Push Tag
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create tag
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          if git ls-remote --tags origin "$VERSION" | grep -q "refs/tags/$VERSION"; then
+            echo "Tag $VERSION already exists. Skipping"; exit 0; fi
+          MAJOR_MINOR=$(echo "$VERSION" | sed 's/^v//' | cut -d. -f1,2)
+          BRANCH="release-$MAJOR_MINOR"
+          git fetch origin "$BRANCH":"$BRANCH"
+          git checkout "$BRANCH"
+          git tag "$VERSION"
+          git push origin "$VERSION"
+
   publish-pypi:
     name: Publish to PyPI
-    needs: [build]
+    needs: [build, create-tag]
     runs-on: ubuntu-latest
     environment:
       name: release
@@ -104,7 +138,7 @@ jobs:
 
   github-release:
     name: Create GitHub Release
-    needs: [build, publish-pypi]
+    needs: [build, create-tag, publish-pypi]
     runs-on: ubuntu-latest
     environment:
       name: release
@@ -119,13 +153,16 @@ jobs:
         id: changelog
         run: |
           VERSION="${{ needs.build.outputs.version }}"
+          MAJOR_MINOR=$(echo "$VERSION" | sed 's/^v//' | cut -d. -f1,2)
+          CHANGELOG_FILE="CHANGELOG/CHANGELOG-${MAJOR_MINOR}.md"
 
-          if [[ -f CHANGELOG.md ]]; then
-            NEXT_VERSION=$(sed -n "/^# \[v$VERSION\]/,\$p" CHANGELOG.md | tail -n +2 | grep -m1 "^# \[v[0-9]" || echo "")
+          if [[ -f "$CHANGELOG_FILE" ]]; then
+            HEADER_REGEX="^# \\[${VERSION//./\\.}\\]"
+            NEXT_VERSION=$(sed -n "/$HEADER_REGEX/,$p" "$CHANGELOG_FILE" | tail -n +2 | grep -m1 "^# \\[v[0-9]" || echo "")
             if [[ -n "$NEXT_VERSION" ]]; then
-              CHANGELOG=$(sed -n "/^# \[v$VERSION\]/,/^# \[v[0-9]/p" CHANGELOG.md | sed '$d' | tail -n +2)
+              CHANGELOG=$(sed -n "/$HEADER_REGEX/,/^# \\[v[0-9]/p" "$CHANGELOG_FILE" | sed '1d;$d')
             else
-              CHANGELOG=$(sed -n "/^# \[v$VERSION\]/,\$p" CHANGELOG.md | tail -n +2)
+              CHANGELOG=$(sed -n "/$HEADER_REGEX/,$p" "$CHANGELOG_FILE" | sed '1d')
             fi
             if [[ -n "$CHANGELOG" ]]; then
               {
@@ -134,10 +171,10 @@ jobs:
                 echo "EOF"
               } >> $GITHUB_OUTPUT
             else
-              echo "changelog=**Note:** CHANGELOG.md was not updated for this release" >> $GITHUB_OUTPUT
+              echo "changelog=**Note:** No changelog section found for $VERSION in $CHANGELOG_FILE" >> $GITHUB_OUTPUT
             fi
           else
-            echo "changelog=**Note:** CHANGELOG.md not found" >> $GITHUB_OUTPUT
+            echo "changelog=**Note:** $CHANGELOG_FILE not found" >> $GITHUB_OUTPUT
           fi
 
       - name: Create GitHub Release
