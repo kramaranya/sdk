@@ -1,14 +1,15 @@
 import argparse
+import os
 import sys
 
 try:
     from github import Github
 except ImportError:
-    print("Install PyGithub with pip install -e \".[dev]\"")
+    print("Install PyGithub with uv sync")
     sys.exit(1)
 
 REPO_NAME = "kubeflow/sdk"
-CHANGELOG_FILE = "CHANGELOG.md"
+CHANGELOG_DIR = "CHANGELOG"
 
 
 def categorize_pr(title: str) -> str:
@@ -47,7 +48,7 @@ def main():
             previous_release = get_initial_commit(github_repo)
         else:
             previous_release = tags[0].name
-            print(f"Generating changelog: {previous_release} → HEAD (for {current_release})")
+            print(f"Generating changelog: {previous_release} → {current_release}")
     except Exception as e:
         print(f"Error finding previous release: {e}")
         sys.exit(1)
@@ -86,6 +87,12 @@ def main():
     release_date = str(commits[-1].commit.author.date).split(" ")[0]
     release_url = f"https://github.com/{REPO_NAME}/releases/tag/{current_release}"
 
+    major_minor_parts = current_release.lstrip('v').split('.')[:2]
+    major_minor = '.'.join(major_minor_parts)
+    changelog_file = os.path.join(CHANGELOG_DIR, f"CHANGELOG-{major_minor}.md")
+
+    os.makedirs(CHANGELOG_DIR, exist_ok=True)
+
     changelog_content = [
         f"# [{current_release}]({release_url}) ({release_date})\n\n"
     ]
@@ -113,30 +120,23 @@ def main():
     changelog_content.append(f"**Full Changelog**: {comparison.html_url}\n\n")
 
     try:
-        with open(CHANGELOG_FILE, "r") as f:
+        with open(changelog_file, "r") as f:
             existing_content = f.read()
     except FileNotFoundError:
-        existing_content = "# Changelog\n\n"
+        existing_content = ""
 
-    lines = existing_content.split('\n')
-
-    insert_index = 0
-    for i, line in enumerate(lines):
-        if line.strip() == "# Changelog":
-            insert_index = i + 1
-            while insert_index < len(lines) and not lines[insert_index].strip():
-                insert_index += 1
-            break
+    lines = existing_content.split('\n') if existing_content else []
 
     new_content = ''.join(changelog_content)
-    new_lines = (
-        lines[:insert_index] + new_content.rstrip().split('\n') + [''] + lines[insert_index:]
-    )
+    if lines:
+        new_lines = new_content.rstrip().split('\n') + [''] + lines
+    else:
+        new_lines = new_content.rstrip().split('\n')
 
-    with open(CHANGELOG_FILE, "w") as f:
+    with open(changelog_file, "w") as f:
         f.write('\n'.join(new_lines))
 
-    print("Changelog has been updated")
+    print(f"Changelog has been updated: {changelog_file}")
     print(f"Found {len(pr_set)} PRs for {current_release}")
 
 
