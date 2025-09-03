@@ -25,7 +25,7 @@ jobs:
             - Our team will review your PR soon! cc @kubeflow/kubeflow-sdk-team
 
             **Join the community:**
-            - **Slack**: Join our [#kubeflow-ml-experience](https://www.kubeflow.org/docs/about/community/#kubeflow-slack-channels) Slack channel
+            - **Slack**: Join our [#kubeflow-ml-experience](https://www.kubeflow.org/docs/about/community/#kubeflow-slack-channels) and [#kubeflow-trainer](https://www.kubeflow.org/docs/about/community/#kubeflow-slack-channels) Slack channels
             - **Meetings**: Attend the [Kubeflow SDK and ML Experience](https://bit.ly/kf-ml-experience) bi-weekly meetings
 
             Feel free to ask questions in the comments if you need any help or clarification!
