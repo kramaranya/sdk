@@ -158,12 +158,14 @@ jobs:
           CHANGELOG_FILE="CHANGELOG/CHANGELOG-${MAJOR_MINOR}.md"
 
           if [[ -f "$CHANGELOG_FILE" ]]; then
+            set -euo pipefail
             HEADER_REGEX="^# \\[${VERSION//./\\.}\\]"
-            NEXT_VERSION=$(sed -n "/$HEADER_REGEX/,$p" "$CHANGELOG_FILE" | tail -n +2 | grep -m1 "^# \\[v[0-9]" || echo "")
+            SECTION=$(sed -n "/$HEADER_REGEX/,\$p" "$CHANGELOG_FILE" | tail -n +2)
+            NEXT_VERSION=$(echo "$SECTION" | grep -m1 "^# \\[v[0-9]" || true)
             if [[ -n "$NEXT_VERSION" ]]; then
-              CHANGELOG=$(sed -n "/$HEADER_REGEX/,/^# \\[v[0-9]/p" "$CHANGELOG_FILE" | sed '1d;$d')
+              CHANGELOG=$(echo "$SECTION" | sed -n "1,/^# \\[v[0-9]/p" | sed '1d;$d')
             else
-              CHANGELOG=$(sed -n "/$HEADER_REGEX/,$p" "$CHANGELOG_FILE" | sed '1d')
+              CHANGELOG=$(echo "$SECTION" | sed '1d')
             fi
             if [[ -n "$CHANGELOG" ]]; then
               {
