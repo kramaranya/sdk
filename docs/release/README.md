@@ -1,0 +1,138 @@
+# Releasing the Kubeflow SDK
+
+## Prerequisites
+
+- [Write](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-permission-levels-for-an-organization#permission-levels-for-repositories-owned-by-an-organization)
+  permission for the Kubeflow SDK repository.
+
+- Create a [GitHub Token](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token) and set it as `GITHUB_TOKEN` environment variable.
+
+- Install development dependencies:
+
+  ```bash
+  uv sync
+  ```
+
+## Versioning Policy
+
+Kubeflow SDK version format follows [Semantic Versioning](https://semver.org/).
+Kubeflow SDK versions are in the format of `vX.Y.Z`, where `X` is the major version, `Y` is
+the minor version, and `Z` is the patch version.
+The patch version contains only bug fixes.
+
+Additionally, Kubeflow SDK does pre-releases in this format: `vX.Y.Z-rc.N` where `N` is a number
+of the `Nth` release candidate (RC) before an upcoming public release named `vX.Y.Z`.
+
+## Release Branches and Tags
+
+Kubeflow SDK releases are tagged with tags like `vX.Y.Z`, for example `v0.1.0`.
+
+Release branches are in the format of `release-X.Y`, where `X.Y` stands for
+the minor release.
+
+`vX.Y.Z` releases are released from the `release-X.Y` branch. For example,
+`v0.1.0` release should be on `release-0.1` branch.
+
+If you want to push changes to the `release-X.Y` release branch, you have to
+cherry pick your changes from the `main` branch and submit a PR.
+
+## Changelog Structure
+
+Kubeflow SDK uses a directory-based changelog structure under `CHANGELOG/`:
+
+```
+CHANGELOG/
+├── CHANGELOG-0.1.md    # All 0.1.x releases
+├── CHANGELOG-0.2.md    # All 0.2.x releases
+└── CHANGELOG-0.3.md    # All 0.3.x releases
+```
+
+Each file contains releases for that minor series, with the most recent releases at the top.
+
+## Release Process
+
+### Automated Release Workflow
+
+The Kubeflow SDK uses an automated release process with GitHub Actions:
+
+1. **Local Preparation**: Update version and generate changelog locally
+2. **Automated CI**: GitHub Actions handles branch creation, tagging, building, and publishing
+3. **Manual Approvals**: PyPI and GitHub releases require manual approval
+
+### Step-by-Step Release Process
+
+#### 1. Update Version and Changelog
+
+1. Generate version and changelog locally:
+
+   ```sh
+   export GITHUB_TOKEN=<your_github_token>
+   make release VERSION=vX.Y.Z
+   ```
+
+This updates:
+- `kubeflow/__init__.py` with `__version__ = "X.Y.Z"`
+- `CHANGELOG/CHANGELOG-X.Y.md` with a new top entry `# [vX.Y.Z] (YYYY-MM-DD)`
+
+2. Open a PR:
+   - Review `kubeflow/__init__.py` and `CHANGELOG/CHANGELOG-X.Y.md`
+   - Open a PR to `main` and get it reviewed and merged
+
+#### 2. Automated Release Branch Creation
+
+The `Prepare Release` GitHub Action automatically:
+
+- Detects the version change in `kubeflow/__init__.py`
+- Creates or updates the `release-X.Y` branch
+- Cherry-picks the version bump commit from main
+
+**Verification**: Confirm the release branch was created/updated!
+
+#### 3. Automated Release Process
+
+The `Release` GitHub Action automatically:
+
+- Runs tests and builds the package
+- Creates and pushes the release tag
+- Publishes to PyPI (requires manual approval)
+- Creates GitHub Release (requires manual approval)
+
+**Verification**: Confirm the release tag was created!
+
+#### 4. Manual Approvals
+
+1. **PyPI Publishing**: Go to [GitHub Actions](https://github.com/kubeflow/sdk/actions) → `Release` workflow → Approve "Publish to PyPI"
+
+2. **GitHub Release**: After PyPI approval → Approve "Create GitHub Release"
+
+#### 5. Final Verification
+
+1. Verify the release on [PyPI](https://pypi.org/project/kubeflow/)
+2. Verify the release on [GitHub Releases](https://github.com/kubeflow/sdk/releases)
+3. Test installation: `pip install kubeflow==X.Y.Z`
+
+### Release Types
+
+#### Major/Minor Release (vX.Y.0)
+
+- Creates new `release-X.Y` branch
+- Uses full changelog since previous minor version
+- Example: `make release VERSION=v0.2.0`
+
+#### Patch Release (vX.Y.Z)
+
+- Updates existing `release-X.Y` branch
+- Cherry-pick fixes from main to release branch
+- Example: `make release VERSION=v0.2.1`
+
+#### Release Candidate (vX.Y.Z-rc.N)
+
+- Creates pre-release
+- GitHub Release marked as "pre-release"
+- Example: `make release VERSION=v0.2.0-rc.1`
+
+## Announcement
+
+**Announce**: Post the announcement for the new Kubeflow SDK release in:
+- [#kubeflow-ml-experience](https://www.kubeflow.org/docs/about/community/#slack-channels) Slack channel
+- [kubeflow-discuss](https://www.kubeflow.org/docs/about/community/#kubeflow-mailing-list) mailing list
