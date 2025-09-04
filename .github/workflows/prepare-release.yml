@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'kubeflow/__init__.py'
+  workflow_dispatch: {}
 
 permissions:
   contents: write
