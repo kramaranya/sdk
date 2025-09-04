@@ -5,13 +5,14 @@ on:
     branches: [ main ]
     paths:
       - 'kubeflow/__init__.py'
+  workflow_dispatch: {}
 
 permissions:
   contents: write
 
 jobs:
   prepare:
-    name: Create release branch and tag
+    name: Create release branch
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,7 +25,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Compute version and branch
+      - name: Check version and branch
         id: vars
         shell: bash
         run: |
@@ -35,11 +36,11 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
 
-      - name: Skip if tag already exists
+      - name: Check if tag already exists
         shell: bash
         run: |
           if git ls-remote --tags origin "${{ steps.vars.outputs.version }}" | grep -q "refs/tags/${{ steps.vars.outputs.version }}"; then
-            echo "Tag ${{ steps.vars.outputs.version }} already exists. Skipping prepare."; exit 0; fi
+            echo "Tag ${{ steps.vars.outputs.version }} already exists. Skipping CI."; exit 0; fi
 
       - name: Ensure release branch exists and contains version bump
         shell: bash
@@ -54,7 +55,6 @@ jobs:
             echo "Using existing branch: $BRANCH"
             git fetch origin "$BRANCH":"$BRANCH"
             git checkout "$BRANCH"
-            # Cherry-pick the version bump commit from main
             if ! git cherry-pick -x "$MAIN_SHA"; then
               echo "Cherry-pick failed. Please resolve manually on $BRANCH." >&2
               exit 1
