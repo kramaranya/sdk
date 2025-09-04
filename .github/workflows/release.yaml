@@ -5,6 +5,7 @@ on:
     workflows: ["Prepare Release"]
     types:
       - completed
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -12,7 +13,7 @@ permissions:
 
 jobs:
   guard:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     outputs:
       proceed: ${{ steps.set.outputs.proceed }}
@@ -43,7 +44,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
 
-          if [[ "$VERSION" =~ -rc\.|alpha|beta ]]; then
+          if [[ "$VERSION" =~ -rc($|\.) ]]; then
             echo "is-prerelease=true" >> $GITHUB_OUTPUT
           else
             echo "is-prerelease=false" >> $GITHUB_OUTPUT
@@ -108,8 +109,7 @@ jobs:
         run: |
           VERSION="${{ needs.build.outputs.version }}"
           if git ls-remote --tags origin "$VERSION" | grep -q "refs/tags/$VERSION"; then
-            echo "Tag $VERSION already exists. Skipping."; exit 0; fi
-          # Ensure we're tagging the release branch commit
+            echo "Tag $VERSION already exists. Skipping"; exit 0; fi
           MAJOR_MINOR=$(echo "$VERSION" | sed 's/^v//' | cut -d. -f1,2)
           BRANCH="release-$MAJOR_MINOR"
           git fetch origin "$BRANCH":"$BRANCH"
@@ -154,13 +154,16 @@ jobs:
         id: changelog
         run: |
           VERSION="${{ needs.build.outputs.version }}"
+          MAJOR_MINOR=$(echo "$VERSION" | sed 's/^v//' | cut -d. -f1,2)
+          CHANGELOG_FILE="CHANGELOG/CHANGELOG-${MAJOR_MINOR}.md"
 
-          if [[ -f CHANGELOG.md ]]; then
-            NEXT_VERSION=$(sed -n "/^# \[v$VERSION\]/,\$p" CHANGELOG.md | tail -n +2 | grep -m1 "^# \[v[0-9]" || echo "")
+          if [[ -f "$CHANGELOG_FILE" ]]; then
+            HEADER_REGEX="^# \\[${VERSION//./\\.}\\]"
+            NEXT_VERSION=$(sed -n "/$HEADER_REGEX/,$p" "$CHANGELOG_FILE" | tail -n +2 | grep -m1 "^# \\[v[0-9]" || echo "")
             if [[ -n "$NEXT_VERSION" ]]; then
-              CHANGELOG=$(sed -n "/^# \[v$VERSION\]/,/^# \[v[0-9]/p" CHANGELOG.md | sed '$d' | tail -n +2)
+              CHANGELOG=$(sed -n "/$HEADER_REGEX/,/^# \\[v[0-9]/p" "$CHANGELOG_FILE" | sed '1d;$d')
             else
-              CHANGELOG=$(sed -n "/^# \[v$VERSION\]/,\$p" CHANGELOG.md | tail -n +2)
+              CHANGELOG=$(sed -n "/$HEADER_REGEX/,$p" "$CHANGELOG_FILE" | sed '1d')
             fi
             if [[ -n "$CHANGELOG" ]]; then
               {
@@ -169,10 +172,10 @@ jobs:
                 echo "EOF"
               } >> $GITHUB_OUTPUT
             else
-              echo "changelog=**Note:** CHANGELOG.md was not updated for this release" >> $GITHUB_OUTPUT
+              echo "changelog=**Note:** No changelog section found for $VERSION in $CHANGELOG_FILE" >> $GITHUB_OUTPUT
             fi
           else
-            echo "changelog=**Note:** CHANGELOG.md not found" >> $GITHUB_OUTPUT
+            echo "changelog=**Note:** $CHANGELOG_FILE not found" >> $GITHUB_OUTPUT
           fi
 
       - name: Create GitHub Release
