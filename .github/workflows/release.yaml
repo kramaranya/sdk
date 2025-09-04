@@ -159,11 +159,11 @@ jobs:
 
           if [[ -f "$CHANGELOG_FILE" ]]; then
             HEADER_REGEX="^# \\[${VERSION//./\\.}\\]"
-            NEXT_VERSION=$(sed -n "/$HEADER_REGEX/,$p" "$CHANGELOG_FILE" | tail -n +2 | grep -m1 "^# \\[v[0-9]" || echo "")
+            NEXT_VERSION=$(sed -n "/$HEADER_REGEX/,\$p" "$CHANGELOG_FILE" | tail -n +2 | grep -m1 "^# \\[v[0-9]" || echo
             if [[ -n "$NEXT_VERSION" ]]; then
               CHANGELOG=$(sed -n "/$HEADER_REGEX/,/^# \\[v[0-9]/p" "$CHANGELOG_FILE" | sed '1d;$d')
             else
-              CHANGELOG=$(sed -n "/$HEADER_REGEX/,$p" "$CHANGELOG_FILE" | sed '1d')
+              CHANGELOG=$(sed -n "/$HEADER_REGEX/,\$p" "$CHANGELOG_FILE" | sed '1d')
             fi
             if [[ -n "$CHANGELOG" ]]; then
               {
