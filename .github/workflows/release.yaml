@@ -189,4 +189,4 @@ jobs:
             ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: ${{ needs.build.outputs.is-prerelease == 'true' }}
-          generate_release_notes: true
+          generate_release_notes: false
