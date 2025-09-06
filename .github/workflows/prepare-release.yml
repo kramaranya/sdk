@@ -37,12 +37,17 @@ jobs:
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
 
       - name: Check if tag already exists
+        id: tagcheck
         shell: bash
         run: |
           if git ls-remote --tags origin "${{ steps.vars.outputs.version }}" | grep -q "refs/tags/${{ steps.vars.outputs.version }}"; then
-            echo "Tag ${{ steps.vars.outputs.version }} already exists. Skipping CI."; exit 0; fi
+            echo "tag_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag_exists=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Ensure release branch exists and contains version bump
+        if: steps.tagcheck.outputs.tag_exists == 'false'
         shell: bash
         run: |
           set -euo pipefail
@@ -55,9 +60,13 @@ jobs:
             echo "Using existing branch: $BRANCH"
             git fetch origin "$BRANCH":"$BRANCH"
             git checkout "$BRANCH"
-            if ! git cherry-pick -x "$MAIN_SHA"; then
-              echo "Cherry-pick failed. Please resolve manually on $BRANCH." >&2
-              exit 1
+            if git merge-base --is-ancestor "$MAIN_SHA" "$BRANCH"; then
+              echo "Commit $MAIN_SHA already present in $BRANCH. Skipping cherry-pick."
+            else
+              if ! git cherry-pick -x "$MAIN_SHA"; then
+                echo "Cherry-pick failed. Please resolve manually on $BRANCH." >&2
+                exit 1
+              fi
             fi
           else
             echo "Creating new branch: $BRANCH from main@${MAIN_SHA}"
