@@ -64,6 +64,12 @@ uv-venv:
 		echo "uv virtual environment already exists in $(VENV_DIR)."; \
 	fi
 
+.PHONY: release
+release: uv-venv
+	@if [ -z "$(VERSION)" ]; then echo "Usage: make release VERSION=v0.1.0"; exit 1; fi
+	@uv run python scripts/set-version.py $(VERSION)
+	@uv run python scripts/gen-changelog.py --token=$${GITHUB_TOKEN} --version=$(VERSION)
+
  # make test-python will produce html coverage by default. Run with `make test-python report=xml` to produce xml report.
 .PHONY: test-python
 test-python: uv-venv
