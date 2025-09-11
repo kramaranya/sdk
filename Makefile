@@ -65,9 +65,11 @@ uv-venv:
 	fi
 
 .PHONY: release
-release: uv-venv
+release: install-dev
 	@if [ -z "$(VERSION)" ]; then echo "Usage: make release VERSION=v0.1.0"; exit 1; fi
-	@uv run python scripts/set-version.py $(VERSION)
+	@V_NO_V=$${VERSION#v}; \
+	sed -i.bak "s/^__version__ = \".*\"/__version__ = \"$$V_NO_V\"/" kubeflow/__init__.py && \
+	rm -f kubeflow/__init__.py.bak
 	@uv run python scripts/gen-changelog.py --token=$${GITHUB_TOKEN} --version=$(VERSION)
 
  # make test-python will produce html coverage by default. Run with `make test-python report=xml` to produce xml report.
