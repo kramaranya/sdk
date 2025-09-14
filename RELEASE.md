@@ -7,12 +7,6 @@
 
 - Create a [GitHub Token](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token) and set it as `GITHUB_TOKEN` environment variable.
 
-- Install development dependencies:
-
-  ```bash
-  uv sync
-  ```
-
 ## Versioning Policy
 
 Kubeflow SDK version format follows [Semantic Versioning](https://semver.org/).
@@ -63,7 +57,7 @@ The Kubeflow SDK uses an automated release process with GitHub Actions:
 
 #### 1. Update Version and Changelog
 
-1. Generate version and changelog locally:
+1. Generate version and changelog locally (this will sync dependencies automatically):
 
    ```sh
    export GITHUB_TOKEN=<your_github_token>
