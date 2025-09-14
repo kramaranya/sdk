@@ -170,6 +170,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ needs.prepare.outputs.version }}
+          path: dist/
       - name: Extract changelog
         id: changelog
         run: |
@@ -208,3 +213,5 @@ jobs:
           draft: false
           prerelease: ${{ needs.prepare.outputs.is-prerelease == 'true' }}
           generate_release_notes: false
+          files: |
+            dist/*
