@@ -2,7 +2,9 @@ name: Release
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - 'release-*'
     paths:
       - 'kubeflow/__init__.py'
   workflow_dispatch: {}
@@ -14,6 +16,7 @@ permissions:
 jobs:
   prepare:
     name: Prepare release branch
+    if: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release-') && github.actor == 'github-actions[bot]') }}
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.vars.outputs.version }}
@@ -51,6 +54,11 @@ jobs:
           VERSION="${{ steps.vars.outputs.version }}"
           BRANCH="${{ steps.vars.outputs.branch }}"
           MAIN_SHA="${{ github.sha }}"
+
+          if [[ "${GITHUB_REF_NAME}" == "$BRANCH" ]]; then
+            echo "Triggered on $BRANCH. Skipping cherry-pick from main."
+            exit 0
+          fi
 
           if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
             echo "Using existing branch: $BRANCH"
