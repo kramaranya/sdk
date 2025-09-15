@@ -117,8 +117,6 @@ def main():
         changelog_content.append("## Other Changes\n\n")
         changelog_content.append("\n".join(categories['misc']) + "\n\n")
 
-    changelog_content.append(f"**Full Changelog**: {comparison.html_url}\n\n")
-
     try:
         with open(changelog_file, "r") as f:
             existing_content = f.read()
