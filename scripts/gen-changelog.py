@@ -77,7 +77,7 @@ def main():
 
             category = categorize_pr(pr.title)
             pr_entry = (f"- {pr.title} ([#{pr.number}]({pr.html_url})) "
-                        f"by [@{pr.user.login}]({pr.user.html_url})")
+                        f"by @{pr.user.login}")
             categories[category].append(pr_entry)
 
     if not pr_set:
