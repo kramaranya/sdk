@@ -118,7 +118,7 @@ def main():
         changelog_content.append("\n".join(categories['misc']) + "\n\n")
 
     try:
-        with open(changelog_file, "r") as f:
+        with open(changelog_file) as f:
             existing_content = f.read()
     except FileNotFoundError:
         existing_content = ""
