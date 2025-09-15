@@ -70,7 +70,8 @@ This updates:
 
 2. Open a PR:
    - Review `kubeflow/__init__.py` and `CHANGELOG/CHANGELOG-X.Y.md`
-   - Open a PR to `main` and get it reviewed and merged
+   - **For latest minor series**: Open a PR to `main` and get it reviewed and merged
+   - **For older minor series patch (e.g. 0.1.1 when main is at 0.2.x)**: Open a PR to the corresponding `release-X.Y` branch
 
 #### 2. Automated Release Process
 
