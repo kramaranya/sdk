@@ -180,28 +180,23 @@ jobs:
           VERSION="${{ needs.prepare.outputs.version }}"
           MAJOR_MINOR=$(echo "$VERSION" | cut -d. -f1,2)
           CHANGELOG_FILE="CHANGELOG/CHANGELOG-${MAJOR_MINOR}.md"
-          if [[ -f "$CHANGELOG_FILE" ]]; then
-            set -euo pipefail
-            HEADER_REGEX="^# \\[${VERSION//./\\.}\\]"
-            SECTION=$(sed -n "/$HEADER_REGEX/,\$p" "$CHANGELOG_FILE" | tail -n +2)
-            NEXT_VERSION=$(echo "$SECTION" | grep -m1 "^# \\[[0-9]" || true)
-            if [[ -n "$NEXT_VERSION" ]]; then
-              CHANGELOG=$(echo "$SECTION" | sed -n "1,/^# \\[[0-9]/p" | sed '1d;$d')
-            else
-              CHANGELOG=$(echo "$SECTION" | sed '1d')
-            fi
-            if [[ -n "$CHANGELOG" ]]; then
-              {
-                echo "changelog<<EOF"
-                echo "$CHANGELOG"
-                echo "EOF"
-              } >> $GITHUB_OUTPUT
-            else
-              echo "changelog=**Note:** No changelog section found for $VERSION in $CHANGELOG_FILE" >> $GITHUB_OUTPUT
-            fi
+          set -euo pipefail
+          [[ -f "$CHANGELOG_FILE" ]] || { echo "ERROR: $CHANGELOG_FILE not found" >&2; exit 1; }
+          HEADER_REGEX="^# \\[${VERSION//./\\.}\\]"
+          SECTION=$(sed -n "/$HEADER_REGEX/,\$p" "$CHANGELOG_FILE" | tail -n +2)
+          [[ -n "$SECTION" ]] || { echo "ERROR: No changelog section for $VERSION in $CHANGELOG_FILE" >&2; exit 1; }
+          NEXT_VERSION=$(echo "$SECTION" | grep -m1 "^# \\[[0-9]" || true)
+          if [[ -n "$NEXT_VERSION" ]]; then
+            CHANGELOG=$(echo "$SECTION" | sed -n "1,/^# \\[[0-9]/p" | sed '1d;$d')
           else
-            echo "changelog=**Note:** $CHANGELOG_FILE not found" >> $GITHUB_OUTPUT
+            CHANGELOG=$(echo "$SECTION" | sed '1d')
           fi
+          [[ -n "$CHANGELOG" ]] || { echo "ERROR: Empty changelog body for $VERSION in $CHANGELOG_FILE" >&2; exit 1; }
+          {
+            echo "changelog<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
