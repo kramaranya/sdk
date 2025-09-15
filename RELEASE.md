@@ -96,25 +96,6 @@ The `Release` GitHub Action automatically:
 2. Verify the release on [GitHub Releases](https://github.com/kubeflow/sdk/releases)
 3. Test installation: `pip install kubeflow==X.Y.Z`
 
-### Release Types
-
-#### Major/Minor Release (X.Y.0)
-
-- Creates new `release-X.Y` branch
-- Uses full changelog since previous minor version
-- Example: `make release VERSION=0.2.0`
-
-#### Patch Release (X.Y.Z)
-
-- Updates existing `release-X.Y` branch
-- Cherry-pick fixes from main to release branch
-- Example: `make release VERSION=0.2.1`
-
-#### Release Candidate (X.Y.ZrcN)
-
-- Creates pre-release
-- GitHub Release marked as "pre-release"
-- Example: `make release VERSION=0.2.0rc1`
 
 ## Announcement
 
