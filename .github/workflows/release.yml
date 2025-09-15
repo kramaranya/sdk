@@ -35,14 +35,14 @@ jobs:
       - name: Check version and branch
         id: vars
         run: |
-          VERSION=v$(sed -n 's/^__version__ = "\(.*\)"/\1/p' kubeflow/__init__.py)
-          MAJOR_MINOR=$(echo "$VERSION" | sed 's/^v//' | cut -d. -f1,2)
+          VERSION=$(sed -n 's/^__version__ = "\(.*\)"/\1/p' kubeflow/__init__.py)
+          MAJOR_MINOR=$(echo "$VERSION" | cut -d. -f1,2)
           BRANCH=release-$MAJOR_MINOR
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
 
-          if [[ "$VERSION" =~ -rc($|\.) ]]; then
+          if [[ "$VERSION" =~ rc[0-9]+$ ]]; then
             echo "is-prerelease=true" >> $GITHUB_OUTPUT
           else
             echo "is-prerelease=false" >> $GITHUB_OUTPUT
@@ -109,7 +109,7 @@ jobs:
       - name: Verify version
         run: |
           TAG_VERSION="${{ needs.prepare.outputs.version }}"
-          CODE_VERSION="v$(python -c "import kubeflow; print(kubeflow.__version__)")"
+          CODE_VERSION="$(python -c "import kubeflow; print(kubeflow.__version__)")"
           echo "Tag version: $TAG_VERSION"
           echo "Code version: $CODE_VERSION"
           if [[ "$TAG_VERSION" != "$CODE_VERSION" ]]; then
@@ -187,15 +187,15 @@ jobs:
         id: changelog
         run: |
           VERSION="${{ needs.prepare.outputs.version }}"
-          MAJOR_MINOR=$(echo "$VERSION" | sed 's/^v//' | cut -d. -f1,2)
+          MAJOR_MINOR=$(echo "$VERSION" | cut -d. -f1,2)
           CHANGELOG_FILE="CHANGELOG/CHANGELOG-${MAJOR_MINOR}.md"
           if [[ -f "$CHANGELOG_FILE" ]]; then
             set -euo pipefail
             HEADER_REGEX="^# \\[${VERSION//./\\.}\\]"
             SECTION=$(sed -n "/$HEADER_REGEX/,\$p" "$CHANGELOG_FILE" | tail -n +2)
-            NEXT_VERSION=$(echo "$SECTION" | grep -m1 "^# \\[v[0-9]" || true)
+            NEXT_VERSION=$(echo "$SECTION" | grep -m1 "^# \\[[0-9]" || true)
             if [[ -n "$NEXT_VERSION" ]]; then
-              CHANGELOG=$(echo "$SECTION" | sed -n "1,/^# \\[v[0-9]/p" | sed '1d;$d')
+              CHANGELOG=$(echo "$SECTION" | sed -n "1,/^# \\[[0-9]/p" | sed '1d;$d')
             else
               CHANGELOG=$(echo "$SECTION" | sed '1d')
             fi

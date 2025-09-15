@@ -66,8 +66,8 @@ uv-venv:
 
 .PHONY: release
 release: install-dev
-	@if [ -z "$(VERSION)" ]; then echo "Usage: make release VERSION=v0.1.0"; exit 1; fi
-	@V_NO_V=$${VERSION#v}; \
+	@if [ -z "$(VERSION)" ]; then echo "Usage: make release VERSION=0.1.0"; exit 1; fi
+	@V_NO_V=$(VERSION); \
 	sed -i.bak "s/^__version__ = \".*\"/__version__ = \"$$V_NO_V\"/" kubeflow/__init__.py && \
 	rm -f kubeflow/__init__.py.bak
 	@uv run python scripts/gen-changelog.py --token=$${GITHUB_TOKEN} --version=$(VERSION)

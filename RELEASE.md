@@ -9,23 +9,23 @@
 
 ## Versioning Policy
 
-Kubeflow SDK version format follows [Semantic Versioning](https://semver.org/).
-Kubeflow SDK versions are in the format of `vX.Y.Z`, where `X` is the major version, `Y` is
+Kubeflow SDK version format follows Python's [PEP 440](https://peps.python.org/pep-0440/).
+Kubeflow SDK versions are in the format of `X.Y.Z`, where `X` is the major version, `Y` is
 the minor version, and `Z` is the patch version.
 The patch version contains only bug fixes.
 
-Additionally, Kubeflow SDK does pre-releases in this format: `vX.Y.Z-rc.N` where `N` is a number
-of the `Nth` release candidate (RC) before an upcoming public release named `vX.Y.Z`.
+Additionally, Kubeflow SDK does pre-releases in this format: `X.Y.ZrcN` where `N` is a number
+of the `Nth` release candidate (RC) before an upcoming public release named `X.Y.Z`.
 
 ## Release Branches and Tags
 
-Kubeflow SDK releases are tagged with tags like `vX.Y.Z`, for example `v0.1.0`.
+Kubeflow SDK releases are tagged with tags like `X.Y.Z`, for example `0.1.0`.
 
 Release branches are in the format of `release-X.Y`, where `X.Y` stands for
 the minor release.
 
-`vX.Y.Z` releases are released from the `release-X.Y` branch. For example,
-`v0.1.0` release should be on `release-0.1` branch.
+`X.Y.Z` releases are released from the `release-X.Y` branch. For example,
+`0.1.0` release should be on `release-0.1` branch.
 
 If you want to push changes to the `release-X.Y` release branch, you have to
 cherry pick your changes from the `main` branch and submit a PR.
@@ -61,12 +61,12 @@ The Kubeflow SDK uses an automated release process with GitHub Actions:
 
    ```sh
    export GITHUB_TOKEN=<your_github_token>
-   make release VERSION=vX.Y.Z
+   make release VERSION=X.Y.Z
    ```
 
 This updates:
 - `kubeflow/__init__.py` with `__version__ = "X.Y.Z"`
-- `CHANGELOG/CHANGELOG-X.Y.md` with a new top entry `# [vX.Y.Z] (YYYY-MM-DD)`
+- `CHANGELOG/CHANGELOG-X.Y.md` with a new top entry `# [X.Y.Z] (YYYY-MM-DD)`
 
 2. Open a PR:
    - Review `kubeflow/__init__.py` and `CHANGELOG/CHANGELOG-X.Y.md`
@@ -107,23 +107,23 @@ The `Release` GitHub Action automatically:
 
 ### Release Types
 
-#### Major/Minor Release (vX.Y.0)
+#### Major/Minor Release (X.Y.0)
 
 - Creates new `release-X.Y` branch
 - Uses full changelog since previous minor version
-- Example: `make release VERSION=v0.2.0`
+- Example: `make release VERSION=0.2.0`
 
-#### Patch Release (vX.Y.Z)
+#### Patch Release (X.Y.Z)
 
 - Updates existing `release-X.Y` branch
 - Cherry-pick fixes from main to release branch
-- Example: `make release VERSION=v0.2.1`
+- Example: `make release VERSION=0.2.1`
 
-#### Release Candidate (vX.Y.Z-rc.N)
+#### Release Candidate (X.Y.ZrcN)
 
 - Creates pre-release
 - GitHub Release marked as "pre-release"
-- Example: `make release VERSION=v0.2.0-rc.1`
+- Example: `make release VERSION=0.2.0rc1`
 
 ## Announcement
 

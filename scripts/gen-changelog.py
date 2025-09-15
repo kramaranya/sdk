@@ -34,7 +34,7 @@ def get_initial_commit(github_repo):
 def main():
     parser = argparse.ArgumentParser(description="Generate changelog for Kubeflow SDK")
     parser.add_argument("--token", required=True, help="GitHub Access Token")
-    parser.add_argument("--version", required=True, help="Target version (e.g. v0.1.0)")
+    parser.add_argument("--version", required=True, help="Target version (e.g. 0.1.0)")
 
     args = parser.parse_args()
 
@@ -87,7 +87,7 @@ def main():
     release_date = str(commits[-1].commit.author.date).split(" ")[0]
     release_url = f"https://github.com/{REPO_NAME}/releases/tag/{current_release}"
 
-    major_minor_parts = current_release.lstrip('v').split('.')[:2]
+    major_minor_parts = current_release.split('.')[:2]
     major_minor = '.'.join(major_minor_parts)
     changelog_file = os.path.join(CHANGELOG_DIR, f"CHANGELOG-{major_minor}.md")
 
