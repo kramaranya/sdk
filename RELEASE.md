@@ -72,34 +72,25 @@ This updates:
    - Review `kubeflow/__init__.py` and `CHANGELOG/CHANGELOG-X.Y.md`
    - Open a PR to `main` and get it reviewed and merged
 
-#### 2. Automated Release Branch Creation
-
-The `Prepare Release` GitHub Action automatically:
-
-- Detects the version change in `kubeflow/__init__.py`
-- Creates or updates the `release-X.Y` branch
-- Cherry-picks the version bump commit from main
-
-**Verification**: Confirm the release branch was created/updated!
-
-#### 3. Automated Release Process
+#### 2. Automated Release Process
 
 The `Release` GitHub Action automatically:
 
-- Runs tests and builds the package
-- Creates and pushes the release tag
-- Publishes to PyPI (requires manual approval)
-- Creates GitHub Release (requires manual approval)
+1. **Prepare**: Detects the version change in `kubeflow/__init__.py` and creates or updates the `release-X.Y` branch
+2. **Build**: Runs tests and builds the package on the release branch
+3. **Tag**: Creates and pushes the release tag
+4. **Publish**: Publishes to PyPI (requires manual approval)
+5. **Release**: Creates GitHub Release (requires manual approval)
 
-**Verification**: Confirm the release tag was created!
+**Verification**: Confirm the release branch and tag were created!
 
-#### 4. Manual Approvals
+#### 3. Manual Approvals
 
 1. **PyPI Publishing**: Go to [GitHub Actions](https://github.com/kubeflow/sdk/actions) → `Release` workflow → Approve "Publish to PyPI"
 
 2. **GitHub Release**: After PyPI approval → Approve "Create GitHub Release"
 
-#### 5. Final Verification
+#### 4. Final Verification
 
 1. Verify the release on [PyPI](https://pypi.org/project/kubeflow/)
 2. Verify the release on [GitHub Releases](https://github.com/kubeflow/sdk/releases)
