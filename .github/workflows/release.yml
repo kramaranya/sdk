@@ -175,6 +175,7 @@ jobs:
           name: dist-${{ needs.prepare.outputs.version }}
           path: dist/
       - name: Extract changelog
+        if: needs.prepare.outputs.is-prerelease != 'true'
         id: changelog
         run: |
           VERSION="${{ needs.prepare.outputs.version }}"
@@ -202,8 +203,7 @@ jobs:
         with:
           tag_name: ${{ needs.prepare.outputs.version }}
           name: ${{ needs.prepare.outputs.version }}
-          body: |
-            ${{ steps.changelog.outputs.changelog }}
+          body: ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: ${{ needs.prepare.outputs.is-prerelease == 'true' }}
           generate_release_notes: false

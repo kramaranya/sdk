@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import sys
 
 try:
@@ -39,6 +40,10 @@ def main():
     args = parser.parse_args()
 
     current_release = args.version
+
+    if re.search(r"rc\d+$", current_release):
+        print("Skipping changelog generation for pre release")
+        return
     github_repo = Github(args.token).get_repo(REPO_NAME)
 
     try:
