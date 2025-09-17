@@ -5,7 +5,6 @@
 [![Join Slack](https://img.shields.io/badge/Join_Slack-blue?logo=slack)](https://www.kubeflow.org/docs/about/community/#kubeflow-slack-channels)
 [![Coverage Status](https://coveralls.io/repos/github/kubeflow/sdk/badge.svg?branch=main)](https://coveralls.io/github/kubeflow/sdk?branch=main)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kubeflow/sdk)
-[![Python Supported Versions](https://img.shields.io/pypi/pyversions/kubeflow.svg?color=%2334D058)](https://pypi.org/project/kubeflow/) -->
 
 ## Overview
 
