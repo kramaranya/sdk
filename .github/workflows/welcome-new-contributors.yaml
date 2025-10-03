@@ -1,7 +1,7 @@
 name: Welcome new contributors
 
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
 
@@ -13,8 +13,8 @@ jobs:
     steps:
       - uses: actions/first-interaction@v3
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          pr-message: |
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_message: |
             🎉 **Welcome to the Kubeflow SDK!** 🎉
 
             Thanks for opening your first PR! We're happy to have you as part of our community 🚀
