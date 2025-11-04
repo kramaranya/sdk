@@ -251,6 +251,72 @@ class KubernetesBackend(RuntimeBackend):
             f"{status}"
         )
 
+    def get_best_trial(self, name: str) -> Optional[Trial]:
+        """Get the best current Trial for the OptimizationJob"""
+        try:
+            thread = self.custom_api.get_namespaced_custom_object(
+                constants.GROUP,
+                constants.VERSION,
+                self.namespace,
+                constants.EXPERIMENT_PLURAL,
+                name,
+                async_req=True,
+            )
+
+            optimization_job = models.V1beta1Experiment.from_dict(
+                thread.get(common_constants.DEFAULT_TIMEOUT)  # type: ignore
+            )
+
+        except multiprocessing.TimeoutError as e:
+            raise TimeoutError(
+                f"Timeout to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
+            ) from e
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
+            ) from e
+
+        # Get the best trial from currentOptimalTrial
+        if (
+            optimization_job.status
+            and optimization_job.status.current_optimal_trial
+            and optimization_job.status.current_optimal_trial.best_trial_name
+        ):
+            best_trial_name = optimization_job.status.current_optimal_trial.best_trial_name
+
+            parameters = {}
+            if optimization_job.status.current_optimal_trial.parameter_assignments:
+                parameters = {
+                    pa.name: pa.value
+                    for pa in optimization_job.status.current_optimal_trial.parameter_assignments
+                    if pa.name is not None and pa.value is not None
+                }
+
+            metrics = []
+            if (
+                optimization_job.status.current_optimal_trial.observation
+                and optimization_job.status.current_optimal_trial.observation.metrics
+            ):
+                metrics = [
+                    Metric(name=m.name, latest=m.latest, max=m.max, min=m.min)
+                    for m in optimization_job.status.current_optimal_trial.observation.metrics
+                    if m.name is not None
+                    and m.latest is not None
+                    and m.max is not None
+                    and m.min is not None
+                ]
+
+            trainjob = self.trainer_backend.get_job(name=best_trial_name)
+
+            return Trial(
+                name=best_trial_name,
+                parameters=parameters,
+                metrics=metrics,
+                trainjob=trainjob,
+            )
+
+        return None
+
     def get_job(self, name: str) -> OptimizationJob:
         """Get the OptimizationJob object"""
 
