@@ -17,6 +17,7 @@ from typing import Any, Optional
 
 from kubeflow.common.types import KubernetesBackendConfig
 from kubeflow.optimizer.backends.kubernetes.backend import KubernetesBackend
+from kubeflow.optimizer.constants import constants as optimizer_constants
 from kubeflow.optimizer.types.algorithm_types import BaseAlgorithm
 from kubeflow.optimizer.types.optimization_types import Objective, OptimizationJob, TrialConfig
 from kubeflow.trainer.types.types import TrainJobTemplate
@@ -124,3 +125,36 @@ class OptimizerClient:
             RuntimeError: Failed to delete OptimizationJob.
         """
         return self.backend.delete_job(name=name)
+
+    def wait_for_job_status(
+        self,
+        name: str,
+        status: set[str] = {optimizer_constants.OPTIMIZATION_JOB_COMPLETE},
+        timeout: int = 3600,
+        polling_interval: int = 2,
+    ) -> OptimizationJob:
+        """Wait for an OptimizationJob to reach a desired status.
+
+        Args:
+            name: Name of the OptimizationJob.
+            status: Expected statuses. Must be a subset of Created, Running, Complete, and
+                Failed statuses.
+            timeout: Maximum number of seconds to wait for the OptimizationJob to reach one of the
+                expected statuses.
+            polling_interval: The polling interval in seconds to check OptimizationJob status.
+
+        Returns:
+            An OptimizationJob object that reaches the desired status.
+
+        Raises:
+            ValueError: The input values are incorrect.
+            RuntimeError: Failed to get OptimizationJob or OptimizationJob reaches unexpected
+                Failed status.
+            TimeoutError: Timeout to wait for OptimizationJob status.
+        """
+        return self.backend.wait_for_job_status(
+            name=name,
+            status=status,
+            timeout=timeout,
+            polling_interval=polling_interval,
+        )

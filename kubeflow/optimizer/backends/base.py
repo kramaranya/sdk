@@ -17,6 +17,7 @@ from typing import Any, Optional
 
 from kubeflow.optimizer.types.algorithm_types import RandomSearch
 from kubeflow.optimizer.types.optimization_types import Objective, OptimizationJob, TrialConfig
+from kubeflow.trainer.constants import constants
 from kubeflow.trainer.types.types import TrainJobTemplate
 
 
@@ -43,4 +44,14 @@ class RuntimeBackend(abc.ABC):
 
     @abc.abstractmethod
     def delete_job(self, name: str):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def wait_for_job_status(
+        self,
+        name: str,
+        status: set[str] = {constants.OPTIMIZATION_JOB_COMPLETE},
+        timeout: int = 3600,
+        polling_interval: int = 2,
+    ) -> OptimizationJob:
         raise NotImplementedError()

@@ -16,6 +16,7 @@ import logging
 import multiprocessing
 import random
 import string
+import time
 from typing import Any, Optional
 import uuid
 
@@ -205,6 +206,50 @@ class KubernetesBackend(RuntimeBackend):
             ) from e
 
         return result
+
+    def wait_for_job_status(
+        self,
+        name: str,
+        status: set[str] = {constants.OPTIMIZATION_JOB_COMPLETE},
+        timeout: int = 3600,
+        polling_interval: int = 2,
+    ) -> OptimizationJob:
+        job_statuses = {
+            constants.OPTIMIZATION_JOB_CREATED,
+            constants.OPTIMIZATION_JOB_RUNNING,
+            constants.OPTIMIZATION_JOB_COMPLETE,
+            constants.OPTIMIZATION_JOB_FAILED,
+        }
+
+        if not status.issubset(job_statuses):
+            raise ValueError(f"Expected status {status} must be a subset of {job_statuses}")
+
+        if polling_interval > timeout:
+            raise ValueError(
+                f"Polling interval {polling_interval} must be less than timeout: {timeout}"
+            )
+
+        for _ in range(round(timeout / polling_interval)):
+            optimization_job = self.get_job(name)
+            logger.debug(
+                f"{constants.OPTIMIZATION_JOB_KIND} {name}, status {optimization_job.status}"
+            )
+
+            if (
+                constants.OPTIMIZATION_JOB_FAILED not in status
+                and optimization_job.status == constants.OPTIMIZATION_JOB_FAILED
+            ):
+                raise RuntimeError(f"{constants.OPTIMIZATION_JOB_KIND} {name} is Failed")
+
+            if optimization_job.status in status:
+                return optimization_job
+
+            time.sleep(polling_interval)
+
+        raise TimeoutError(
+            f"Timeout waiting for {constants.OPTIMIZATION_JOB_KIND} {name} to reach status: "
+            f"{status}"
+        )
 
     def get_job(self, name: str) -> OptimizationJob:
         """Get the OptimizationJob object"""
