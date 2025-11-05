@@ -209,31 +209,8 @@ class KubernetesBackend(RuntimeBackend):
 
     def get_job(self, name: str) -> OptimizationJob:
         """Get the OptimizationJob object"""
-
-        try:
-            thread = self.custom_api.get_namespaced_custom_object(
-                constants.GROUP,
-                constants.VERSION,
-                self.namespace,
-                constants.EXPERIMENT_PLURAL,
-                name,
-                async_req=True,
-            )
-
-            optimization_job = models.V1beta1Experiment.from_dict(
-                thread.get(common_constants.DEFAULT_TIMEOUT)  # type: ignore
-            )
-
-        except multiprocessing.TimeoutError as e:
-            raise TimeoutError(
-                f"Timeout to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
-            ) from e
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
-            ) from e
-
-        return self.__get_optimization_job_from_cr(optimization_job)  # type: ignore
+        optimization_job = self.__get_experiment_cr(name)
+        return self.__get_optimization_job_from_cr(optimization_job)
 
     def wait_for_job_status(
         self,
@@ -281,28 +258,7 @@ class KubernetesBackend(RuntimeBackend):
 
     def get_best_trial(self, name: str) -> Optional[Trial]:
         """Get the best current Trial for the OptimizationJob"""
-        try:
-            thread = self.custom_api.get_namespaced_custom_object(
-                constants.GROUP,
-                constants.VERSION,
-                self.namespace,
-                constants.EXPERIMENT_PLURAL,
-                name,
-                async_req=True,
-            )
-
-            optimization_job = models.V1beta1Experiment.from_dict(
-                thread.get(common_constants.DEFAULT_TIMEOUT)  # type: ignore
-            )
-
-        except multiprocessing.TimeoutError as e:
-            raise TimeoutError(
-                f"Timeout to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
-            ) from e
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
-            ) from e
+        optimization_job = self.__get_experiment_cr(name)
 
         # Get the best trial from currentOptimalTrial
         if (
@@ -366,6 +322,33 @@ class KubernetesBackend(RuntimeBackend):
             ) from e
 
         logger.debug(f"{constants.OPTIMIZATION_JOB_KIND} {self.namespace}/{name} has been deleted")
+
+    def __get_experiment_cr(self, name: str) -> models.V1beta1Experiment:
+        """Get the Experiment CR from Kubernetes API"""
+        try:
+            thread = self.custom_api.get_namespaced_custom_object(
+                constants.GROUP,
+                constants.VERSION,
+                self.namespace,
+                constants.EXPERIMENT_PLURAL,
+                name,
+                async_req=True,
+            )
+
+            optimization_job = models.V1beta1Experiment.from_dict(
+                thread.get(common_constants.DEFAULT_TIMEOUT)  # type: ignore
+            )
+
+        except multiprocessing.TimeoutError as e:
+            raise TimeoutError(
+                f"Timeout to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
+            ) from e
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
+            ) from e
+
+        return optimization_job
 
     def __get_optimization_job_from_cr(
         self,
