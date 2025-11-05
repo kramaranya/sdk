@@ -41,7 +41,7 @@ pip install -U kubeflow
 ```python
 from kubeflow.trainer import TrainerClient, CustomTrainer, TrainJobTemplate
 
-def get_torch_dist(learning_rate, num_epochs):
+def get_torch_dist(learning_rate: str, num_epochs: str):
     import os
     import torch
     import torch.distributed as dist
@@ -54,10 +54,10 @@ def get_torch_dist(learning_rate, num_epochs):
 
     lr = float(learning_rate)
     epochs = int(num_epochs)
-    accuracy = 0.8 + (lr * 10) + (epochs * 0.01)
+    loss = 1.0 - (lr * 2) - (epochs * 0.01)
 
     if dist.get_rank() == 0:
-        print(f"accuracy={accuracy}")
+        print(f"loss={loss}")
 
 # Create the TrainJob template
 template = TrainJobTemplate(
@@ -83,7 +83,7 @@ print("\n".join(TrainerClient().get_job_logs(name=job_id)))
 ### Optimize hyperparameters for your training
 
 ```python
-from kubeflow.optimizer import OptimizerClient, Search, Objective, TrialConfig
+from kubeflow.optimizer import OptimizerClient, Search, TrialConfig
 
 # Create OptimizationJob with the same template
 optimization_id = OptimizerClient().optimize(
@@ -93,7 +93,6 @@ optimization_id = OptimizerClient().optimize(
         "learning_rate": Search.loguniform(0.001, 0.1),
         "num_epochs": Search.choice([5, 10, 15]),
     },
-    objectives=[Objective(metric="accuracy", direction="maximize")],
 )
 
 print(f"OptimizationJob created: {optimization_id}")
