@@ -19,7 +19,7 @@ ML applications rather than managing complex infrastrutcure.
 - **Seamless Integration**: Designed to work together with all Kubeflow projects for end-to-end ML pipelines
 - **Local Development**: First-class support for local development requiring only `pip` installation
 
-![Kubeflow SDK Diagram](docs/images/kubeflow-sdk.drawio.svg)
+![Kubeflow SDK Diagram](https://raw.githubusercontent.com/kubeflow/sdk/main/docs/images/kubeflow-sdk.drawio.svg)
 
 ## Get Started
 
