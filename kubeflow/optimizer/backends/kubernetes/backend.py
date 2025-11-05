@@ -207,6 +207,34 @@ class KubernetesBackend(RuntimeBackend):
 
         return result
 
+    def get_job(self, name: str) -> OptimizationJob:
+        """Get the OptimizationJob object"""
+
+        try:
+            thread = self.custom_api.get_namespaced_custom_object(
+                constants.GROUP,
+                constants.VERSION,
+                self.namespace,
+                constants.EXPERIMENT_PLURAL,
+                name,
+                async_req=True,
+            )
+
+            optimization_job = models.V1beta1Experiment.from_dict(
+                thread.get(common_constants.DEFAULT_TIMEOUT)  # type: ignore
+            )
+
+        except multiprocessing.TimeoutError as e:
+            raise TimeoutError(
+                f"Timeout to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
+            ) from e
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
+            ) from e
+
+        return self.__get_optimization_job_from_cr(optimization_job)  # type: ignore
+
     def wait_for_job_status(
         self,
         name: str,
@@ -316,34 +344,6 @@ class KubernetesBackend(RuntimeBackend):
             )
 
         return None
-
-    def get_job(self, name: str) -> OptimizationJob:
-        """Get the OptimizationJob object"""
-
-        try:
-            thread = self.custom_api.get_namespaced_custom_object(
-                constants.GROUP,
-                constants.VERSION,
-                self.namespace,
-                constants.EXPERIMENT_PLURAL,
-                name,
-                async_req=True,
-            )
-
-            optimization_job = models.V1beta1Experiment.from_dict(
-                thread.get(common_constants.DEFAULT_TIMEOUT)  # type: ignore
-            )
-
-        except multiprocessing.TimeoutError as e:
-            raise TimeoutError(
-                f"Timeout to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
-            ) from e
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed to get {constants.OPTIMIZATION_JOB_KIND}: {self.namespace}/{name}"
-            ) from e
-
-        return self.__get_optimization_job_from_cr(optimization_job)  # type: ignore
 
     def delete_job(self, name: str):
         """Delete the OptimizationJob"""

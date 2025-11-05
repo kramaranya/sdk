@@ -48,10 +48,6 @@ class RuntimeBackend(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def delete_job(self, name: str):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
     def wait_for_job_status(
         self,
         name: str,
@@ -63,4 +59,8 @@ class RuntimeBackend(abc.ABC):
 
     @abc.abstractmethod
     def get_best_trial(self, name: str) -> Optional[Trial]:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def delete_job(self, name: str):
         raise NotImplementedError()

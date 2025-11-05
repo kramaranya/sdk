@@ -17,7 +17,7 @@ from typing import Any, Optional
 
 from kubeflow.common.types import KubernetesBackendConfig
 from kubeflow.optimizer.backends.kubernetes.backend import KubernetesBackend
-from kubeflow.optimizer.constants import constants as optimizer_constants
+from kubeflow.optimizer.constants import constants
 from kubeflow.optimizer.types.algorithm_types import BaseAlgorithm
 from kubeflow.optimizer.types.optimization_types import (
     Objective,
@@ -119,22 +119,10 @@ class OptimizerClient:
 
         return self.backend.get_job(name=name)
 
-    def delete_job(self, name: str):
-        """Delete the OptimizationJob.
-
-        Args:
-            name: Name of the OptimizationJob.
-
-        Raises:
-            TimeoutError: Timeout to delete OptimizationJob.
-            RuntimeError: Failed to delete OptimizationJob.
-        """
-        return self.backend.delete_job(name=name)
-
     def wait_for_job_status(
         self,
         name: str,
-        status: set[str] = {optimizer_constants.OPTIMIZATION_JOB_COMPLETE},
+        status: set[str] = {constants.OPTIMIZATION_JOB_COMPLETE},
         timeout: int = 3600,
         polling_interval: int = 2,
     ) -> OptimizationJob:
@@ -179,3 +167,15 @@ class OptimizerClient:
             RuntimeError: Failed to get OptimizationJob.
         """
         return self.backend.get_best_trial(name=name)
+
+    def delete_job(self, name: str):
+        """Delete the OptimizationJob.
+
+        Args:
+            name: Name of the OptimizationJob.
+
+        Raises:
+            TimeoutError: Timeout to delete OptimizationJob.
+            RuntimeError: Failed to delete OptimizationJob.
+        """
+        return self.backend.delete_job(name=name)
