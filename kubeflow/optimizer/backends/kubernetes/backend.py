@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections.abc import Iterator
 import logging
 import multiprocessing
 import random
@@ -21,7 +22,7 @@ from typing import Any, Optional
 import uuid
 
 from kubeflow_katib_api import models
-from kubernetes import client, config
+from kubernetes import client, config, watch
 
 import kubeflow.common.constants as common_constants
 from kubeflow.common.types import KubernetesBackendConfig
@@ -211,6 +212,60 @@ class KubernetesBackend(RuntimeBackend):
         """Get the OptimizationJob object"""
         optimization_job = self.__get_experiment_cr(name)
         return self.__get_optimization_job_from_cr(optimization_job)
+
+    def get_job_logs(
+        self,
+        name: str,
+        trial: Optional[str] = None,
+        follow: bool = False,
+        step: str = trainer_constants.NODE + "-0",
+    ) -> Iterator[str]:
+        """Get the OptimizationJob logs from a Trial"""
+        # Determine what trial to get logs from.
+        if trial is None:
+            # Get logs from the best current trial.
+            best_trial = self.get_best_trial(name)
+            if best_trial is None:
+                # TODO (kramaranya): Consider waiting for best trial when follow=True
+                return
+            trial = best_trial.name
+            logger.info(f"Getting logs from best trial: {trial}")
+
+        # Get the Trial's Pod name.
+        pod_name = None
+        for c in self.trainer_backend.get_job(trial).steps:
+            if c.status != trainer_constants.POD_PENDING and c.name == step:
+                pod_name = c.pod_name
+                break
+        if pod_name is None:
+            return
+
+        container_name = constants.METRICS_COLLECTOR_CONTAINER
+        try:
+            if follow:
+                log_stream = watch.Watch().stream(
+                    self.core_api.read_namespaced_pod_log,
+                    name=pod_name,
+                    namespace=self.namespace,
+                    container=container_name,
+                    follow=True,
+                )
+
+                # Stream logs incrementally.
+                yield from log_stream  # type: ignore
+            else:
+                logs = self.core_api.read_namespaced_pod_log(
+                    name=pod_name,
+                    namespace=self.namespace,
+                    container=container_name,
+                )
+
+                yield from logs.splitlines()
+
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to read logs for the pod {self.namespace}/{pod_name}"
+            ) from e
 
     def wait_for_job_status(
         self,

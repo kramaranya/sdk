@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import abc
+from collections.abc import Iterator
 from typing import Any, Optional
 
 from kubeflow.optimizer.constants import constants
@@ -45,6 +46,16 @@ class RuntimeBackend(abc.ABC):
 
     @abc.abstractmethod
     def get_job(self, name: str) -> OptimizationJob:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get_job_logs(
+        self,
+        name: str,
+        trial: Optional[str],
+        follow: bool,
+        step: str,
+    ) -> Iterator[str]:
         raise NotImplementedError()
 
     @abc.abstractmethod
