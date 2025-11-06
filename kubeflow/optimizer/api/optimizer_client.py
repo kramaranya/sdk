@@ -160,7 +160,7 @@ class OptimizerClient:
         """
         return self.backend.get_job_logs(name=name, trial_name=trial_name, follow=follow)
 
-    def get_best_results(self, name: str) -> Optional["Result"]:
+    def get_best_results(self, name: str) -> Optional[Result]:
         """Get the best hyperparameters and metrics from an OptimizationJob.
 
         This method retrieves the optimal hyperparameters and their corresponding metrics
