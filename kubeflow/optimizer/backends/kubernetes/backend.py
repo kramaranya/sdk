@@ -22,7 +22,7 @@ from typing import Any, Optional
 import uuid
 
 from kubeflow_katib_api import models
-from kubernetes import client, config, watch
+from kubernetes import client, config
 
 import kubeflow.common.constants as common_constants
 from kubeflow.common.types import KubernetesBackendConfig
@@ -245,31 +245,9 @@ class KubernetesBackend(RuntimeBackend):
             return
 
         container_name = constants.METRICS_COLLECTOR_CONTAINER
-        try:
-            if follow:
-                log_stream = watch.Watch().stream(
-                    self.core_api.read_namespaced_pod_log,
-                    name=pod_name,
-                    namespace=self.namespace,
-                    container=container_name,
-                    follow=True,
-                )
-
-                # Stream logs incrementally.
-                yield from log_stream  # type: ignore
-            else:
-                logs = self.core_api.read_namespaced_pod_log(
-                    name=pod_name,
-                    namespace=self.namespace,
-                    container=container_name,
-                )
-
-                yield from logs.splitlines()
-
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed to read logs for the pod {self.namespace}/{pod_name}"
-            ) from e
+        yield from self.trainer_backend._read_pod_logs(
+            pod_name=pod_name, container_name=container_name, follow=follow
+        )
 
     def wait_for_job_status(
         self,
