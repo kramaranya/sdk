@@ -216,24 +216,28 @@ class KubernetesBackend(RuntimeBackend):
     def get_job_logs(
         self,
         name: str,
-        trial: Optional[str] = None,
+        trial_name: Optional[str] = None,
         follow: bool = False,
         step: str = trainer_constants.NODE + "-0",
     ) -> Iterator[str]:
         """Get the OptimizationJob logs from a Trial"""
         # Determine what trial to get logs from.
-        if trial is None:
+        if trial_name is None:
             # Get logs from the best current trial.
             best_trial = self.get_best_trial(name)
             if best_trial is None:
-                # TODO (kramaranya): Consider waiting for best trial when follow=True
-                return
-            trial = best_trial.name
-            logger.info(f"Getting logs from best trial: {trial}")
+                # Get first trial if available.
+                optimization_job = self.get_job(name)
+                if not optimization_job.trials:
+                    return
+                trial_name = optimization_job.trials[0].name
+            else:
+                trial_name = best_trial.name
+            logger.debug(f"Getting logs from trial: {trial_name}")
 
         # Get the Trial's Pod name.
         pod_name = None
-        for c in self.trainer_backend.get_job(trial).steps:
+        for c in self.trainer_backend.get_job(trial_name).steps:
             if c.status != trainer_constants.POD_PENDING and c.name == step:
                 pod_name = c.pod_name
                 break

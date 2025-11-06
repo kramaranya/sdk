@@ -52,7 +52,7 @@ class RuntimeBackend(abc.ABC):
     def get_job_logs(
         self,
         name: str,
-        trial: Optional[str],
+        trial_name: Optional[str],
         follow: bool,
         step: str,
     ) -> Iterator[str]:

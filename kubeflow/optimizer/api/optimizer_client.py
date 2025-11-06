@@ -124,7 +124,7 @@ class OptimizerClient:
     def get_job_logs(
         self,
         name: str,
-        trial: Optional[str] = None,
+        trial_name: Optional[str] = None,
         step: str = trainer_constants.NODE + "-0",
         follow: bool = False,
     ) -> Iterator[str]:
@@ -140,15 +140,16 @@ class OptimizerClient:
 
         # Get logs from a specific trial
         for logline in OptimizerClient().get_job_logs(
-            name="n7fb28dbee94", trial="n7fb28dbee94-abc123", follow=True
+            name="n7fb28dbee94", trial_name="n7fb28dbee94-abc123", follow=True
         ):
             print(logline)
         ```
 
         Args:
             name: Name of the OptimizationJob.
-            trial: Optional name of a specific Trial. If not provided, logs from the
-                current best trial are returned.
+            trial_name: Optional name of a specific Trial. If not provided, logs from the
+                current best trial are returned. If no best trial is available yet, logs
+                from the first trial are returned.
             step: Step of the Trial to collect logs from, like node-0.
             follow: Whether to stream logs in realtime as they are produced.
 
@@ -160,7 +161,7 @@ class OptimizerClient:
             TimeoutError: Timeout to get an OptimizationJob.
             RuntimeError: Failed to get an OptimizationJob.
         """
-        return self.backend.get_job_logs(name=name, trial=trial, follow=follow, step=step)
+        return self.backend.get_job_logs(name=name, trial_name=trial_name, follow=follow, step=step)
 
     def wait_for_job_status(
         self,
