@@ -218,7 +218,6 @@ class KubernetesBackend(RuntimeBackend):
         name: str,
         trial_name: Optional[str] = None,
         follow: bool = False,
-        step: str = trainer_constants.NODE + "-0",
     ) -> Iterator[str]:
         """Get the OptimizationJob logs from a Trial"""
         # Determine what trial to get logs from.
@@ -237,6 +236,7 @@ class KubernetesBackend(RuntimeBackend):
 
         # Get the Trial's Pod name.
         pod_name = None
+        step = trainer_constants.NODE + "-0"
         for c in self.trainer_backend.get_job(trial_name).steps:
             if c.status != trainer_constants.POD_PENDING and c.name == step:
                 pod_name = c.pod_name

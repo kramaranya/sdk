@@ -54,7 +54,6 @@ class RuntimeBackend(abc.ABC):
         name: str,
         trial_name: Optional[str],
         follow: bool,
-        step: str,
     ) -> Iterator[str]:
         raise NotImplementedError()
 

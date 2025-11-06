@@ -26,7 +26,6 @@ from kubeflow.optimizer.types.optimization_types import (
     Trial,
     TrialConfig,
 )
-from kubeflow.trainer.constants import constants as trainer_constants
 from kubeflow.trainer.types.types import TrainJobTemplate
 
 logger = logging.getLogger(__name__)
@@ -125,7 +124,6 @@ class OptimizerClient:
         self,
         name: str,
         trial_name: Optional[str] = None,
-        step: str = trainer_constants.NODE + "-0",
         follow: bool = False,
     ) -> Iterator[str]:
         """Get logs from a specific trial of an OptimizationJob.
@@ -150,7 +148,6 @@ class OptimizerClient:
             trial_name: Optional name of a specific Trial. If not provided, logs from the
                 current best trial are returned. If no best trial is available yet, logs
                 from the first trial are returned.
-            step: Step of the Trial to collect logs from, like node-0.
             follow: Whether to stream logs in realtime as they are produced.
 
         Returns:
@@ -161,7 +158,7 @@ class OptimizerClient:
             TimeoutError: Timeout to get an OptimizationJob.
             RuntimeError: Failed to get an OptimizationJob.
         """
-        return self.backend.get_job_logs(name=name, trial_name=trial_name, follow=follow, step=step)
+        return self.backend.get_job_logs(name=name, trial_name=trial_name, follow=follow)
 
     def wait_for_job_status(
         self,
