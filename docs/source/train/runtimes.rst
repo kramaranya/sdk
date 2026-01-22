@@ -56,12 +56,8 @@ Specify a runtime when creating a training job:
 
 .. code-block:: python
 
-   # Get the runtime
-   runtime = client.get_runtime("torch-distributed")
-
-   # Use it
    client.train(
-       runtime=runtime,
+       runtime="torch-distributed",
        trainer=CustomTrainer(func=my_train_function)
    )
 
@@ -88,7 +84,7 @@ If you don't specify a runtime, the SDK uses ``torch-distributed`` by default:
 
    # These are equivalent
    client.train(trainer=CustomTrainer(func=train))
-   client.train(runtime=client.get_runtime("torch-distributed"), trainer=CustomTrainer(func=train))
+   client.train(runtime="torch-distributed", trainer=CustomTrainer(func=train))
 
 Using Custom Containers
 -----------------------

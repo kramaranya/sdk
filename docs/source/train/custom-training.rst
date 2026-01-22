@@ -52,7 +52,7 @@ When you use ``CustomTrainer(func=...)``:
 Passing Parameters
 ------------------
 
-Use ``func_args`` and ``func_kwargs`` to pass arguments:
+Use ``func_args`` to pass arguments:
 
 .. code-block:: python
 
@@ -63,7 +63,7 @@ Use ``func_args`` and ``func_kwargs`` to pass arguments:
    client.train(
        trainer=CustomTrainer(
            func=train,
-           func_kwargs={"learning_rate": 0.001, "epochs": 10}
+           func_args={"learning_rate": 0.001, "epochs": 10}
        )
    )
 
@@ -80,10 +80,8 @@ Runtimes are pre-configured environments with frameworks like PyTorch or TensorF
        print(f"{rt.name}")
 
    # Use a specific runtime
-   pytorch_runtime = client.get_runtime("torch-distributed")
-
    client.train(
-       runtime=pytorch_runtime,
+       runtime="torch-distributed",
        trainer=CustomTrainer(func=my_training_function)
    )
 
@@ -92,17 +90,15 @@ See :doc:`runtimes` for more details.
 Using GPUs
 ----------
 
-Request GPU resources using options:
+Request GPU resources:
 
 .. code-block:: python
 
-   from kubeflow.trainer.options import NodeCountPerRole, ContainerResources
-
    client.train(
-       trainer=CustomTrainer(func=train),
-       options=[
-           ContainerResources(gpu=2),  # 2 GPUs per node
-       ]
+       trainer=CustomTrainer(
+           func=train,
+           resources_per_node={"gpu": 2}
+       ),
    )
 
 Tips and Best Practices

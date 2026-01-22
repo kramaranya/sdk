@@ -21,13 +21,10 @@ Request multiple GPUs on a single node:
 
 .. code-block:: python
 
-   from kubeflow.trainer import TrainerClient
-   from kubeflow.trainer.types import CustomTrainer
-   from kubeflow.trainer.options import ContainerResources
+   from kubeflow.trainer import TrainerClient, CustomTrainer
 
    def train():
        import torch
-       import torch.distributed as dist
 
        # PyTorch handles multi-GPU automatically with the right runtime
        model = torch.nn.Linear(10, 1)
@@ -38,10 +35,10 @@ Request multiple GPUs on a single node:
 
    client = TrainerClient()
    client.train(
-       trainer=CustomTrainer(func=train),
-       options=[
-           ContainerResources(gpu=4),  # 4 GPUs
-       ]
+       trainer=CustomTrainer(
+           func=train,
+           resources_per_node={"gpu": 4}
+       ),
    )
 
 Multi-Node Training
@@ -51,14 +48,12 @@ Distribute training across multiple machines:
 
 .. code-block:: python
 
-   from kubeflow.trainer.options import NodeCountPerRole
-
    client.train(
-       trainer=CustomTrainer(func=train),
-       options=[
-           NodeCountPerRole(node=4),  # 4 nodes
-           ContainerResources(gpu=2),  # 2 GPUs per node = 8 total
-       ]
+       trainer=CustomTrainer(
+           func=train,
+           num_nodes=4,  # 4 nodes
+           resources_per_node={"gpu": 2},  # 2 GPUs per node = 8 total
+       ),
    )
 
 Using PyTorch Distributed
@@ -87,12 +82,9 @@ For efficient multi-node training, use PyTorch's DistributedDataParallel:
 
        dist.destroy_process_group()
 
-   # Use the torch-distributed runtime
-   runtime = client.get_runtime("torch-distributed")
    client.train(
-       runtime=runtime,
-       trainer=CustomTrainer(func=train),
-       options=[NodeCountPerRole(node=2)]
+       runtime="torch-distributed",
+       trainer=CustomTrainer(func=train, num_nodes=2),
    )
 
 Choosing the Right Strategy
@@ -107,10 +99,10 @@ Choosing the Right Strategy
      - Configuration
    * - Model fits on 1 GPU, want faster training
      - Multi-GPU DataParallel
-     - ``ContainerResources(gpu=4)``
+     - ``resources_per_node={"gpu": 4}``
    * - Model fits on 1 GPU, huge dataset
      - Multi-node DDP
-     - ``NodeCountPerRole(node=4)``
+     - ``num_nodes=4``
    * - Model doesn't fit on 1 GPU
      - Model parallelism (advanced)
      - Custom implementation

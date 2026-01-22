@@ -78,7 +78,7 @@ Supported Projects
    * - :doc:`Trainer <train/index>`
      - ✅ Available
      - Train and fine-tune AI models with various frameworks
-   * - :doc:`Katib <tune/index>`
+   * - :doc:`Katib <optimize/index>`
      - ✅ Available
      - Hyperparameter optimization
    * - :doc:`Model Registry <hub/index>`
@@ -90,6 +90,9 @@ Supported Projects
    * - Spark Operator
      - 🚧 Planned
      - Data processing and feature engineering
+   * - Feast
+     - 🚧 Planned
+     - Feature store for machine learning
 
 ----
 
@@ -150,10 +153,10 @@ Getting Involved
    :hidden:
    :caption: Optimizer
 
-   tune/index
-   tune/search-space
-   tune/algorithms
-   tune/api
+   optimize/index
+   optimize/search-space
+   optimize/algorithms
+   optimize/api
 
 .. toctree::
    :maxdepth: 2
